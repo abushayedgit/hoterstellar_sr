@@ -1,0 +1,56 @@
+version: 2
+
+updates:
+  # -------------------------------------------------------
+  # Node.js / npm dependencies
+  # -------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Asia/Dhaka"
+
+    open-pull-requests-limit: 10
+
+    labels:
+      - "dependencies"
+      - "npm"
+
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+
+      development-dependencies:
+        dependency-type: "development"
+
+    versioning-strategy: increase
+
+    cooldown:
+      default-days: 3
+
+  # -------------------------------------------------------
+  # GitHub Actions dependencies
+  # -------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+      timezone: "Asia/Dhaka"
+
+    open-pull-requests-limit: 10
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"
