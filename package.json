@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "hoterstellar-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hoterstellar Hotel & Restaurant Management Backend API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "worker": "node worker.js",
+    "start": "node server.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@imagekit/nodejs": "latest",
+    "@socket.io/redis-adapter": "latest",
+    "@upstash/redis": "latest",
+    "axios": "latest",
+    "bcryptjs": "latest",
+    "bullmq": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "express-rate-limit": "latest",
+    "express-validator": "latest",
+    "helmet": "latest",
+    "ioredis": "latest",
+    "jsonwebtoken": "latest",
+    "mongoose": "latest",
+    "pino": "latest",
+    "pino-pretty": "latest",
+    "rate-limit-redis": "latest",
+    "socket.io": "latest",
+    "uuid": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "jest": "latest",
+    "mongodb-memory-server": "latest",
+    "nodemon": "latest",
+    "supertest": "latest"
+  }
+}
