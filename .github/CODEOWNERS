@@ -1,0 +1,20 @@
+# Default owners
+
+- @abushayedgit
+
+# Backend source
+
+/src/ @abushayedgit
+
+# CI/CD and security
+
+/.github/ @abushayedgit
+
+# Package management
+
+/package.json @abushayedgit
+/package-lock.json @abushayedgit
+
+# Environment configuration
+
+/.env.example @abushayedgit
