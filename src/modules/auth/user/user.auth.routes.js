@@ -67,4 +67,3 @@ router.put(
 );
 
 export default router;
-s;
