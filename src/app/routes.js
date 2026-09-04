@@ -3,6 +3,8 @@ import adminAuthRoutes from "../modules/auth/admin/admin.auth.routes.js";
 import userAuthRoutes from "../modules/auth/user/user.auth.routes.js";
 import adminRoutes from "../modules/admin/admin.routes.js";
 import userRoutes from "../modules/user/user.routes.js";
+import categoryRoutes from "../modules/category/category.routes.js";
+import foodRoutes from "../modules/food/food.routes.js";
 
 export const apiRoutes = Router();
 
@@ -28,3 +30,9 @@ apiRoutes.use("/admin", adminRoutes);
 
 // User management routes (admin access)
 apiRoutes.use("/users", userRoutes);
+
+// Category routes
+apiRoutes.use("/categories", categoryRoutes);
+
+// Food routes
+apiRoutes.use("/foods", foodRoutes);
