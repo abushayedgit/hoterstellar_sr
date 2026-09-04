@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import { baseSchemaOptions } from "../../../models/base.model.js";
 import { SECURITY } from "../../../constants/security.js";
 
 const adminSchema = new mongoose.Schema(

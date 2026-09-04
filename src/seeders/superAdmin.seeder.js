@@ -1,9 +1,8 @@
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { logger } from "../utils/logger.js";
+import { Admin } from "../modules/auth/admin/admin.model.js";
 
 export const seedSuperAdmin = async () => {
-  const Admin = mongoose.model("Admin");
   const email = process.env.SUPER_ADMIN_EMAIL || process.env.ADMIN_SEED_EMAIL;
   const password =
     process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_SEED_PASSWORD;
