@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
-import { SECURITY } from "../../../constants/security.js";
+import { baseSchemaOptions } from "../../../models/base.model.js";
 
 const adminSessionSchema = new mongoose.Schema(
   {
