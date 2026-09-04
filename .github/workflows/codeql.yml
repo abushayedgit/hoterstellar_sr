@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
       - main
+      - develop
 
   schedule:
     - cron: "30 3 * * 1"
@@ -27,6 +28,13 @@ jobs:
   analyze:
     name: Analyze JavaScript
     runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
 
     steps:
       - name: Checkout repository
@@ -35,13 +43,18 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: javascript-typescript
+          languages: ${{ matrix.language }}
           queries: security-extended
+          config: |
+            paths-ignore:
+              - '**/*.test.js'
+              - '**/*.spec.js'
+              - 'tests/**'
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4
 
-      - name: Analyze
+      - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
-          category: "/language:javascript-typescript"
+          category: "/language:${{ matrix.language }}"

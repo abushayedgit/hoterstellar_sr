@@ -3,18 +3,49 @@
 - @abushayedgit
 
 # Backend source
-
 /src/ @abushayedgit
 
-# CI/CD and security
+# Authentication & security modules
+/src/modules/auth/ @abushayedgit
+/src/middlewares/ @abushayedgit
+/src/errors/ @abushayedgit
 
+# Core infrastructure
+/src/config/ @abushayedgit
+/src/infrastructure/ @abushayedgit
+/src/app/ @abushayedgit
+
+# Business modules
+/src/modules/admin/ @abushayedgit
+/src/modules/user/ @abushayedgit
+/src/modules/food/ @abushayedgit
+/src/modules/category/ @abushayedgit
+/src/modules/cart/ @abushayedgit
+/src/modules/order/ @abushayedgit
+/src/modules/booking/ @abushayedgit
+/src/modules/review/ @abushayedgit
+/src/modules/notice/ @abushayedgit
+/src/modules/billboard/ @abushayedgit
+/src/modules/visitor/ @abushayedgit
+/src/modules/analytics/ @abushayedgit
+
+# CI/CD and security
 /.github/ @abushayedgit
 
 # Package management
-
 /package.json @abushayedgit
 /package-lock.json @abushayedgit
 
 # Environment configuration
-
 /.env.example @abushayedgit
+
+# Tests
+/tests/ @abushayedgit
+
+# Database & Redis config
+/src/config/database.js @abushayedgit
+/src/config/redis.js @abushayedgit
+
+# Email & Storage
+/src/config/brevo.js @abushayedgit
+/src/config/storage.js @abushayedgit

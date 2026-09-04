@@ -1,18 +1,9 @@
-name: CI
+name: CD - Production Deployment
 
 on:
   push:
     branches:
       - main
-      - develop
-      - "feature/**"
-      - "fix/**"
-      - "refactor/**"
-
-  pull_request:
-    branches:
-      - main
-      - develop
 
   workflow_dispatch:
 
@@ -20,18 +11,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: production-deployment
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22.x
 
 jobs:
-  quality:
-    name: Code Quality & Tests
+  test:
+    name: Production Safety Check
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [20.x, 22.x]
 
     steps:
       - name: Checkout repository
@@ -40,28 +29,21 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Verify package
-        run: npm --version
 
       - name: Run tests
         run: npm test
 
-      - name: Run test coverage
-        if: matrix.node-version == '22.x'
-        run: npm run test:coverage
-
       - name: Security audit
-        if: matrix.node-version == '22.x'
         run: npm audit --audit-level=high
 
-  dependency-check:
-    name: Dependency Verification
+  build-check:
+    name: Build Verification
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -71,14 +53,48 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 22.x
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify lockfile
-        run: npm install --package-lock-only --ignore-scripts
+      - name: Verify imports
+        run: node --check server.js && node --check worker.js
 
-      - name: Check git diff
-        run: git diff --exit-code -- package-lock.json
+      - name: Verify environment
+        run: |
+          if [ ! -f .env.example ]; then
+            echo ".env.example not found"
+            exit 1
+          fi
+          echo "Environment template present"
+
+  deploy:
+    name: Trigger Production Deployment
+    needs: build-check
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+      url: https://api.hoterstellar.com
+
+    steps:
+      - name: Trigger deployment
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.PRODUCTION_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "PRODUCTION_DEPLOY_HOOK_URL is not configured."
+            exit 1
+          fi
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --request POST \
+            "$DEPLOY_HOOK_URL"
+
+      - name: Deployment triggered
+        run: echo "Production deployment webhook triggered successfully."

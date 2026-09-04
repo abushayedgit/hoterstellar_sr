@@ -25,14 +25,43 @@ updates:
     groups:
       production-dependencies:
         dependency-type: "production"
+        patterns:
+          - "express"
+          - "mongoose"
+          - "@upstash/redis"
+          - "bullmq"
+          - "socket.io"
+          - "jsonwebtoken"
+          - "bcryptjs"
+          - "helmet"
+          - "cors"
+          - "zod"
+          - "express-validator"
+          - "pino"
+          - "pino-pretty"
+          - "express-rate-limit"
+          - "axios"
+          - "@imagekit/nodejs"
+          - "uuid"
 
       development-dependencies:
         dependency-type: "development"
+        patterns:
+          - "nodemon"
+          - "dotenv"
+          - "jest"
+          - "supertest"
+          - "mongodb-memory-server"
 
     versioning-strategy: increase
 
     cooldown:
       default-days: 3
+
+    ignore:
+      - dependency-name: "pino"
+        versions: [">=11.0.0"]
+        update-types: ["version-update:semver-major"]
 
   # -------------------------------------------------------
   # GitHub Actions dependencies
@@ -54,3 +83,9 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
