@@ -10,7 +10,9 @@
     "worker": "node worker.js",
     "start": "node server.js",
     "test": "jest --runInBand",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "seed": "node src/scripts/seed.js",
+    "seed:dev": "NODE_ENV=development node src/scripts/seed.js"
   },
   "engines": {
     "node": ">=22.0.0",
