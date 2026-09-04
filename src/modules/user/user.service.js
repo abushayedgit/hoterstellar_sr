@@ -1,6 +1,5 @@
 import { User } from "../auth/user/user.model.js";
 import { NotFoundError } from "../../errors/NotFoundError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
 import { logger } from "../../utils/logger.js";
 
 export const listUsers = async (query) => {
