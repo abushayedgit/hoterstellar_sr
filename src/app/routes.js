@@ -5,10 +5,10 @@ import adminRoutes from "../modules/admin/admin.routes.js";
 import userRoutes from "../modules/user/user.routes.js";
 import categoryRoutes from "../modules/category/category.routes.js";
 import foodRoutes from "../modules/food/food.routes.js";
+import cartRoutes from "../modules/cart/cart.routes.js";
 
 export const apiRoutes = Router();
 
-// Temporary placeholder
 apiRoutes.get("/ping", (req, res) => {
   return res.status(200).json({
     success: true,
@@ -19,20 +19,10 @@ apiRoutes.get("/ping", (req, res) => {
   });
 });
 
-// Admin authentication routes
 apiRoutes.use("/auth/admin", adminAuthRoutes);
-
-// User authentication routes
 apiRoutes.use("/auth/user", userAuthRoutes);
-
-// Admin management routes
 apiRoutes.use("/admin", adminRoutes);
-
-// User management routes (admin access)
 apiRoutes.use("/users", userRoutes);
-
-// Category routes
 apiRoutes.use("/categories", categoryRoutes);
-
-// Food routes
 apiRoutes.use("/foods", foodRoutes);
+apiRoutes.use("/cart", cartRoutes);
