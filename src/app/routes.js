@@ -9,7 +9,7 @@ import cartRoutes from "../modules/cart/cart.routes.js";
 import orderRoutes from "../modules/order/order.routes.js";
 import tableBookingRoutes from "../modules/booking/table/tableBooking.routes.js";
 import eventBookingRoutes from "../modules/booking/event/eventBooking.routes.js";
-
+import noticeRoutes from "../modules/notice/notice.routes.js";
 export const apiRoutes = Router();
 
 apiRoutes.get("/ping", (req, res) => {
@@ -32,3 +32,4 @@ apiRoutes.use("/cart", cartRoutes);
 apiRoutes.use("/orders", orderRoutes);
 apiRoutes.use("/bookings/table", tableBookingRoutes);
 apiRoutes.use("/bookings/event", eventBookingRoutes);
+apiRoutes.use("/notices", noticeRoutes);
