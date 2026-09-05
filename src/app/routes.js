@@ -6,6 +6,7 @@ import userRoutes from "../modules/user/user.routes.js";
 import categoryRoutes from "../modules/category/category.routes.js";
 import foodRoutes from "../modules/food/food.routes.js";
 import cartRoutes from "../modules/cart/cart.routes.js";
+import orderRoutes from "../modules/order/order.routes.js";
 
 export const apiRoutes = Router();
 
@@ -26,3 +27,4 @@ apiRoutes.use("/users", userRoutes);
 apiRoutes.use("/categories", categoryRoutes);
 apiRoutes.use("/foods", foodRoutes);
 apiRoutes.use("/cart", cartRoutes);
+apiRoutes.use("/orders", orderRoutes);
