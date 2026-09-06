@@ -22,7 +22,15 @@ const pinoLogger = pino(
   env.NODE_ENV === "development"
     ? {
         ...loggerConfig,
-        transport: { target: "pino-pretty", options: { colorize: true } },
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "HH:MM:ss",
+            ignore: "pid,hostname",
+            messageFormat: "{msg}",
+          },
+        },
       }
     : loggerConfig,
 );
@@ -30,28 +38,28 @@ const pinoLogger = pino(
 export const logger = {
   info: (message, ...args) => {
     if (typeof message === "string") {
-      pinoLogger.info(message, ...args);
+      pinoLogger.info(message);
     } else {
       pinoLogger.info(message);
     }
   },
   warn: (message, ...args) => {
     if (typeof message === "string") {
-      pinoLogger.warn(message, ...args);
+      pinoLogger.warn(message);
     } else {
       pinoLogger.warn(message);
     }
   },
   error: (message, ...args) => {
     if (typeof message === "string") {
-      pinoLogger.error(message, ...args);
+      pinoLogger.error(message);
     } else {
       pinoLogger.error(message);
     }
   },
   debug: (message, ...args) => {
     if (typeof message === "string") {
-      pinoLogger.debug(message, ...args);
+      pinoLogger.debug(message);
     } else {
       pinoLogger.debug(message);
     }

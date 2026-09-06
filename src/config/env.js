@@ -29,6 +29,7 @@ const envSchema = z.object({
 
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  UPSTASH_REDIS_NATIVE_URL: z.string().optional(),
 
   BREVO_API_KEY: z.string().optional(),
   BREVO_SENDER_EMAIL: z.string().email().optional(),

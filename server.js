@@ -6,6 +6,7 @@ import { env } from "./src/config/env.js";
 import { connectRedis, isRedisReady } from "./src/config/redis.js";
 import { initializeSocket } from "./src/config/socket.js";
 import { verifyBrevoOnStartup, isBrevoConfigured } from "./src/config/brevo.js";
+import { getQueue, QUEUE_NAMES } from "./src/config/queue.js";
 import { logger, chalk } from "./src/utils/logger.js";
 import app from "./src/app/app.js";
 
@@ -109,6 +110,14 @@ const getServicesHealth = () => {
       : "Not configured — email disabled",
   });
 
+  services.push({
+    name: "BullMQ Queues",
+    status: isRedisReady() ? "healthy" : "degraded",
+    details: isRedisReady()
+      ? "Email, Analytics, Media queues ready"
+      : "Queues disabled — Redis unavailable",
+  });
+
   return services;
 };
 
@@ -146,6 +155,15 @@ const setupGracefulShutdown = (server) => {
 
     void (async () => {
       try {
+        // Close Socket.IO
+        const { getIO } = await import("./src/config/socket.js");
+        const io = getIO();
+        if (io) {
+          await io.close();
+          logger.info(chalk.blue("  ✓ Socket.IO closed"));
+        }
+
+        // Close MongoDB
         if (mongoose.connection.readyState !== 0) {
           await mongoose.connection.close();
           logger.info(chalk.blue("  ✓ MongoDB connection closed"));
@@ -153,6 +171,7 @@ const setupGracefulShutdown = (server) => {
           logger.info(chalk.gray("  - MongoDB already disconnected"));
         }
 
+        // Redis (Upstash REST) — no cleanup needed
         logger.info(chalk.gray("  - Redis (Upstash REST) — no cleanup needed"));
 
         clearTimeout(forceExit);
@@ -202,6 +221,7 @@ const startServer = async () => {
   printBanner();
   printStartupHeader();
 
+  // Step 1: Validate Environment
   currentStep++;
   printStep(currentStep, totalSteps, "Validating environment", "pass");
   logger.info(
@@ -211,6 +231,7 @@ const startServer = async () => {
   logger.info(`    Dashboard URL: ${env.CLIENT_DASHBOARD_URL}`);
   printDivider();
 
+  // Step 2: Connect to MongoDB
   currentStep++;
   printStep(currentStep, totalSteps, "Connecting to MongoDB...", "info");
   try {
@@ -230,6 +251,7 @@ const startServer = async () => {
   }
   printDivider();
 
+  // Step 3: Check Email Configuration
   currentStep++;
   printStep(currentStep, totalSteps, "Checking email configuration...", "info");
   let emailReady = false;
@@ -254,6 +276,8 @@ const startServer = async () => {
   }
   printDivider();
 
+  // Step 4: Connect to Redis + Initialize Queues
+  // Step 4: Connect to Redis + Initialize Queues
   currentStep++;
   printStep(currentStep, totalSteps, "Connecting to Redis...", "info");
   try {
@@ -263,13 +287,22 @@ const startServer = async () => {
       logger.info(
         `    URL: ${env.UPSTASH_REDIS_REST_URL.replace(/\/\/.*@/, "//***@")}`,
       );
+
+      // Initialize queues (await each one)
+      const emailQueue = await getQueue(QUEUE_NAMES.EMAIL);
+      const analyticsQueue = await getQueue(QUEUE_NAMES.ANALYTICS_ROLLUP);
+      const mediaQueue = await getQueue(QUEUE_NAMES.MEDIA_CLEANUP);
+
+      if (emailQueue) console.log(chalk.gray("    Email queue ready"));
+      if (analyticsQueue) console.log(chalk.gray("    Analytics queue ready"));
+      if (mediaQueue) console.log(chalk.gray("    Media cleanup queue ready"));
     } else {
       printStep(
         currentStep,
         totalSteps,
         "Redis unavailable",
         "warn",
-        "Continuing without cache — rate limiting in memory",
+        "Continuing without cache",
       );
     }
   } catch {
@@ -278,11 +311,12 @@ const startServer = async () => {
       totalSteps,
       "Redis unavailable",
       "warn",
-      "Continuing without cache — rate limiting in memory",
+      "Continuing without cache",
     );
   }
   printDivider();
 
+  // Step 5: Initialize WebSocket
   currentStep++;
   printStep(currentStep, totalSteps, "Initializing WebSocket...", "info");
   const server = http.createServer(app);
@@ -291,6 +325,7 @@ const startServer = async () => {
   logger.info("    Socket.IO attached to HTTP server");
   printDivider();
 
+  // Step 6: Start HTTP Server
   currentStep++;
   printStep(currentStep, totalSteps, "Starting HTTP server...", "info");
 
