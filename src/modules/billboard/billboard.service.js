@@ -3,8 +3,11 @@ import { NotFoundError } from "../../errors/NotFoundError.js";
 import { BadRequestError } from "../../errors/BadRequestError.js";
 import { logger } from "../../utils/logger.js";
 import { sanitizeUrl } from "../../utils/sanitizeHtml.js";
+import { getCache, setCache, deleteCache } from "../../utils/cache.js";
+import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
 
 const MAX_CAROUSELS = 5;
+const BILLBOARD_CACHE_KEY = "cache:billboard:public";
 
 const validateCarouselCount = (carousels) => {
   if (carousels.length > MAX_CAROUSELS) {
@@ -22,18 +25,31 @@ const sanitizeCarousels = (carousels) => {
   }));
 };
 
+const invalidateBillboardCache = async () => {
+  await deleteCache(BILLBOARD_CACHE_KEY);
+};
+
 export const getBillboard = async () => {
   const billboard = await billboardRepository.getSingleton();
   return billboard;
 };
 
 export const getBillboardForPublic = async () => {
+  const cached = await getCache(BILLBOARD_CACHE_KEY);
+  if (cached) {
+    return cached;
+  }
+
   const billboard = await billboardRepository.getSingleton();
 
-  return {
+  const data = {
     billBoardImg: billboard.billBoardImg,
     Carousels: billboard.Carousels.sort((a, b) => a.order - b.order),
   };
+
+  await setCache(BILLBOARD_CACHE_KEY, data, 300);
+
+  return data;
 };
 
 export const updateBillboard = async (updateData, adminId) => {
@@ -49,6 +65,8 @@ export const updateBillboard = async (updateData, adminId) => {
     updatedBy: adminId,
   });
 
+  await invalidateBillboardCache();
+
   logger.info("Billboard updated", {
     adminId,
     carouselCount: sanitizedCarousels.length,
@@ -57,7 +75,7 @@ export const updateBillboard = async (updateData, adminId) => {
   return updatedBillboard;
 };
 
-export const addCarouselItem = async (carouselItem, adminId) => {
+export const addCarouselItem = async (carouselItem, imageFile, adminId) => {
   const billboard = await billboardRepository.getSingleton();
 
   if (billboard.Carousels.length >= MAX_CAROUSELS) {
@@ -66,6 +84,18 @@ export const addCarouselItem = async (carouselItem, adminId) => {
     );
   }
 
+  // Upload image
+  const fileName = `carousel-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const result = await uploadToImageKit(
+    imageFile.buffer,
+    fileName,
+    "billboard/carousels",
+  );
+  carouselItem.img = {
+    url: result.url,
+    imgId: result.fileId,
+  };
+
   const sanitizedItem = sanitizeCarousels([carouselItem])[0];
   sanitizedItem.order = billboard.Carousels.length;
 
@@ -73,12 +103,19 @@ export const addCarouselItem = async (carouselItem, adminId) => {
   billboard.updatedBy = adminId;
   await billboard.save();
 
+  await invalidateBillboardCache();
+
   logger.info("Carousel item added", { adminId });
 
   return billboard;
 };
 
-export const updateCarouselItem = async (imgId, updateData, adminId) => {
+export const updateCarouselItem = async (
+  imgId,
+  updateData,
+  imageFile,
+  adminId,
+) => {
   const billboard = await billboardRepository.getSingleton();
 
   const carouselIndex = billboard.Carousels.findIndex(
@@ -87,6 +124,22 @@ export const updateCarouselItem = async (imgId, updateData, adminId) => {
 
   if (carouselIndex === -1) {
     throw new NotFoundError("Carousel item not found");
+  }
+
+  const oldImageId = billboard.Carousels[carouselIndex].img.imgId;
+
+  // Replace image if new one uploaded
+  if (imageFile) {
+    const fileName = `carousel-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const result = await uploadToImageKit(
+      imageFile.buffer,
+      fileName,
+      "billboard/carousels",
+    );
+    updateData.img = {
+      url: result.url,
+      imgId: result.fileId,
+    };
   }
 
   const updatedItem = {
@@ -101,6 +154,13 @@ export const updateCarouselItem = async (imgId, updateData, adminId) => {
   billboard.Carousels[carouselIndex] = updatedItem;
   billboard.updatedBy = adminId;
   await billboard.save();
+
+  // Delete old image after successful DB update
+  if (imageFile && oldImageId) {
+    await deleteFromImageKit(oldImageId);
+  }
+
+  await invalidateBillboardCache();
 
   logger.info("Carousel item updated", { adminId, imgId });
 
@@ -118,15 +178,21 @@ export const removeCarouselItem = async (imgId, adminId) => {
     throw new NotFoundError("Carousel item not found");
   }
 
+  const oldImageId = billboard.Carousels[carouselIndex].img.imgId;
+
   billboard.Carousels.splice(carouselIndex, 1);
 
-  // Reorder remaining items
   billboard.Carousels.forEach((item, index) => {
     item.order = index;
   });
 
   billboard.updatedBy = adminId;
   await billboard.save();
+
+  // Delete image after successful DB update
+  await deleteFromImageKit(oldImageId);
+
+  await invalidateBillboardCache();
 
   logger.info("Carousel item removed", { adminId, imgId });
 
@@ -151,21 +217,44 @@ export const reorderCarousels = async (carouselsOrder, adminId) => {
   billboard.updatedBy = adminId;
   await billboard.save();
 
+  await invalidateBillboardCache();
+
   logger.info("Carousels reordered", { adminId });
 
   return billboard;
 };
 
-export const updatePopupImage = async (popupImageData, adminId) => {
+export const updatePopupImage = async (popupImageData, imageFile, adminId) => {
   const billboard = await billboardRepository.getSingleton();
 
-  billboard.billBoardImg = popupImageData;
+  const oldImageId = billboard.billBoardImg.imgId;
+
+  // Upload new image
+  const fileName = `popup-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const result = await uploadToImageKit(
+    imageFile.buffer,
+    fileName,
+    "billboard/popup",
+  );
+
+  billboard.billBoardImg = {
+    image: result.url,
+    imgId: result.fileId,
+    altText: popupImageData.altText || billboard.billBoardImg.altText,
+  };
   billboard.updatedBy = adminId;
   await billboard.save();
 
+  // Delete old image after successful DB update
+  if (oldImageId && oldImageId !== "billboard-default") {
+    await deleteFromImageKit(oldImageId);
+  }
+
+  await invalidateBillboardCache();
+
   logger.info("Popup image updated", {
     adminId,
-    newImgId: popupImageData.imgId,
+    newImgId: result.fileId,
   });
 
   return billboard;

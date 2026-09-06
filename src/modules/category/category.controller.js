@@ -9,8 +9,9 @@ import {
 export const createCategoryController = async (req, res, next) => {
   try {
     const categoryData = req.body;
+    const imageFile = req.file;
 
-    const category = await createCategory(categoryData);
+    const category = await createCategory(categoryData, imageFile);
 
     return res.status(201).json({
       success: true,
@@ -62,8 +63,9 @@ export const updateCategoryController = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const imageFile = req.file;
 
-    const category = await updateCategory(id, updateData);
+    const category = await updateCategory(id, updateData, imageFile);
 
     return res.status(200).json({
       success: true,

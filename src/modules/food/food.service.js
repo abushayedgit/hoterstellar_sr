@@ -5,9 +5,24 @@ import { ConflictError } from "../../errors/ConflictError.js";
 import { BadRequestError } from "../../errors/BadRequestError.js";
 import { logger } from "../../utils/logger.js";
 import { generateSlug } from "../../utils/slug.js";
+import { getCache, setCache, deleteCache } from "../../utils/cache.js";
+import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
 
-export const createFood = async (foodData) => {
+let trackedFoodCacheKeys = new Set();
+
+const invalidateAllFoodCaches = async () => {
+  for (const key of trackedFoodCacheKeys) {
+    await deleteCache(key);
+  }
+  trackedFoodCacheKeys.clear();
+};
+
+export const createFood = async (foodData, imageFiles) => {
   const { name, category } = foodData;
+
+  if (!imageFiles || imageFiles.length === 0) {
+    throw new BadRequestError("At least one image is required");
+  }
 
   const existingFood = await Food.findOne({ name });
   if (existingFood) {
@@ -25,10 +40,21 @@ export const createFood = async (foodData) => {
     throw new ConflictError("Food slug already exists");
   }
 
+  // Upload images to ImageKit
+  const uploadedImages = [];
+  for (const file of imageFiles) {
+    const fileName = `food-${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const result = await uploadToImageKit(file.buffer, fileName, "foods");
+    uploadedImages.push({ url: result.url, fileId: result.fileId });
+  }
+
   const food = await Food.create({
     ...foodData,
     slug,
+    images: uploadedImages,
   });
+
+  await invalidateAllFoodCaches();
 
   logger.info("Food created", { foodId: food._id });
 
@@ -49,6 +75,13 @@ export const listFoods = async (query) => {
     sortBy = "createdAt",
     sortOrder = "desc",
   } = query;
+
+  const cacheKey = `cache:foods:public:${page}:${limit}:${category || ""}:${isAvailable || ""}:${isVegetarian || ""}:${isSpicy || ""}:${search || ""}:${minPrice || ""}:${maxPrice || ""}:${sortBy}:${sortOrder}`;
+
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    return cached;
+  }
 
   const filter = {};
 
@@ -81,7 +114,7 @@ export const listFoods = async (query) => {
 
   const totalPages = Math.ceil(total / limit);
 
-  return {
+  const data = {
     data: foods,
     pagination: {
       page,
@@ -92,19 +125,34 @@ export const listFoods = async (query) => {
       hasPrev: page > 1,
     },
   };
+
+  trackedFoodCacheKeys.add(cacheKey);
+  await setCache(cacheKey, data, 60);
+
+  return data;
 };
 
 export const getFoodById = async (foodId) => {
+  const cacheKey = `cache:foods:${foodId}`;
+
+  const cached = await getCache(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const food = await Food.findById(foodId).populate("category", "name slug");
 
   if (!food) {
     throw new NotFoundError("Food not found");
   }
 
-  return food;
+  const foodData = food.toJSON();
+  await setCache(cacheKey, foodData, 300);
+
+  return foodData;
 };
 
-export const updateFood = async (foodId, updateData) => {
+export const updateFood = async (foodId, updateData, imageFiles) => {
   const food = await Food.findById(foodId);
 
   if (!food) {
@@ -126,8 +174,29 @@ export const updateFood = async (foodId, updateData) => {
     }
   }
 
+  // Replace images if new ones uploaded
+  if (imageFiles && imageFiles.length > 0) {
+    // Delete old images
+    for (const oldImage of food.images) {
+      await deleteFromImageKit(oldImage.fileId);
+    }
+
+    // Upload new images
+    const uploadedImages = [];
+    for (const file of imageFiles) {
+      const fileName = `food-${food.slug}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const result = await uploadToImageKit(file.buffer, fileName, "foods");
+      uploadedImages.push({ url: result.url, fileId: result.fileId });
+    }
+
+    food.images = uploadedImages;
+  }
+
   Object.assign(food, updateData);
   await food.save();
+
+  await deleteCache(`cache:foods:${foodId}`);
+  await invalidateAllFoodCaches();
 
   logger.info("Food updated", { foodId });
 
@@ -141,7 +210,15 @@ export const deleteFood = async (foodId) => {
     throw new NotFoundError("Food not found");
   }
 
+  // Delete images from ImageKit
+  for (const image of food.images) {
+    await deleteFromImageKit(image.fileId);
+  }
+
   await Food.findByIdAndDelete(foodId);
+
+  await deleteCache(`cache:foods:${foodId}`);
+  await invalidateAllFoodCaches();
 
   logger.info("Food deleted", { foodId });
 

@@ -22,10 +22,10 @@ import {
   deleteCategoryController,
 } from "./category.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { uploadSingle } from "../../middlewares/upload.middleware.js";
 
 const router = Router();
 
-// Admin authentication middleware
 const adminAuth = createAuthMiddleware(
   env.ADMIN_JWT_SECRET,
   async (adminId) => {
@@ -33,15 +33,16 @@ const adminAuth = createAuthMiddleware(
   },
 );
 
-// Public routes (no auth required)
+// Public routes (service handles caching)
 router.get("/", validateQuery(categoryQuerySchema), listCategoriesController);
 router.get("/:id", validateObjectIdParam("id"), getCategoryController);
 
-// Admin routes
+// Admin routes (no cache)
 router.post(
   "/",
   adminAuth,
   requirePermission(PERMISSIONS.CATEGORIES_MANAGE),
+  uploadSingle,
   validateBody(createCategorySchema),
   auditLog("category.create"),
   createCategoryController,
@@ -52,6 +53,7 @@ router.put(
   adminAuth,
   requirePermission(PERMISSIONS.CATEGORIES_MANAGE),
   validateObjectIdParam("id"),
+  uploadSingle,
   validateBody(updateCategorySchema),
   auditLog("category.update"),
   updateCategoryController,

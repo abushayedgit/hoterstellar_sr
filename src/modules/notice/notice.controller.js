@@ -13,9 +13,10 @@ import {
 export const createNoticeController = async (req, res, next) => {
   try {
     const noticeData = req.body;
+    const imageFile = req.file;
     const adminId = req.auth.adminId;
 
-    const notice = await createNotice(noticeData, adminId);
+    const notice = await createNotice(noticeData, imageFile, adminId);
 
     return res.status(201).json({
       success: true,
@@ -101,8 +102,9 @@ export const updateNoticeController = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const imageFile = req.file;
 
-    const notice = await updateNotice(id, updateData);
+    const notice = await updateNotice(id, updateData, imageFile);
 
     return res.status(200).json({
       success: true,
