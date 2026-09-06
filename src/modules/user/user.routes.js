@@ -15,6 +15,7 @@ import {
   activateUserController,
 } from "./user.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { adminDestructiveRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -48,6 +49,7 @@ router.get(
 // Soft delete user
 router.delete(
   "/:id",
+  adminDestructiveRateLimiter,
   requirePermission(PERMISSIONS.USERS_DELETE),
   validateObjectIdParam("id"),
   auditLog("user.delete"),

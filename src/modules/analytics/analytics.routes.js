@@ -22,6 +22,7 @@ import {
   deleteAnalyticsController,
 } from "./analytics.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { adminDestructiveRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -70,6 +71,7 @@ router.post(
 );
 router.delete(
   "/",
+  adminDestructiveRateLimiter,
   requirePermission(PERMISSIONS.ANALYTICS_DELETE),
   validateBody(deleteAnalyticsSchema),
   auditLog("analytics.delete"),
