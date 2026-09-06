@@ -7,6 +7,8 @@ import { logger } from "../../../utils/logger.js";
 import { getBrevoClient } from "../../../config/brevo.js";
 import { eventBookingConfirmationTemplate } from "../../../emails/templates/eventBookingConfirmationTemplate.js";
 import { adminNewBookingNotificationTemplate } from "../../../emails/templates/adminNewBookingNotificationTemplate.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 const VALID_TRANSITIONS = {
   pending: ["under_review", "cancelled"],
@@ -127,6 +129,14 @@ export const createEventBooking = async (bookingData, userId = null) => {
   logger.info("Event booking created", {
     bookingId: booking._id,
     bookingNumber,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.BOOKING_EVENT_NEW, {
+    bookingId: booking._id,
+    bookingNumber: booking.bookingNumber,
+    customerName: booking.customerName,
+    eventDate: booking.eventDate,
+    guestCount: booking.guestCount,
   });
 
   return booking;
@@ -305,6 +315,20 @@ export const updateEventBookingStatus = async (
     additionalData,
   );
 
+  if (newStatus === "cancelled") {
+    emitAdminEvent(SOCKET_EVENTS.BOOKING_EVENT_CANCELLED, {
+      bookingId,
+      bookingNumber: booking.bookingNumber,
+      status: newStatus,
+    });
+  } else {
+    emitAdminEvent(SOCKET_EVENTS.BOOKING_EVENT_UPDATED, {
+      bookingId,
+      bookingNumber: booking.bookingNumber,
+      status: newStatus,
+    });
+  }
+
   logger.info("Event booking status updated", {
     bookingId,
     from: booking.status,
@@ -364,6 +388,12 @@ export const cancelEventBooking = async (
   logger.info("Event booking cancelled", {
     bookingId,
     userId,
+    reason,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.BOOKING_EVENT_CANCELLED, {
+    bookingId,
+    bookingNumber: booking.bookingNumber,
     reason,
   });
 

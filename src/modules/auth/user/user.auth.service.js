@@ -14,6 +14,8 @@ import { BadRequestError } from "../../../errors/BadRequestError.js";
 import { ConflictError } from "../../../errors/ConflictError.js";
 import { logger } from "../../../utils/logger.js";
 import { getBrevoClient } from "../../../config/brevo.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 const sendOTPEmail = async (email, otp, purpose) => {
   const brevoClient = getBrevoClient();
@@ -138,6 +140,11 @@ export const userSignupVerify = async (email, code, deviceInfo) => {
 
   logger.info("User signed up", { userId: user._id, email: user.email });
 
+  emitAdminEvent(SOCKET_EVENTS.USER_NEW, {
+    userId: user._id,
+    name: user.name,
+    email: user.email,
+  });
   return {
     accessToken,
     refreshToken,

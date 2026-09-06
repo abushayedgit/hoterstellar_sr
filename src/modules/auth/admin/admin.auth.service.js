@@ -14,6 +14,8 @@ import { BadRequestError } from "../../../errors/BadRequestError.js";
 import { ConflictError } from "../../../errors/ConflictError.js";
 import { logger } from "../../../utils/logger.js";
 import { getBrevoClient } from "../../../config/brevo.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 export const adminLogin = async ({ email, password, deviceInfo }) => {
   const admin = await Admin.findOne({ email }).select("+password");
@@ -45,7 +47,7 @@ export const adminLogin = async ({ email, password, deviceInfo }) => {
     env.ADMIN_ACCESS_TOKEN_EXPIRES_IN,
   );
 
- await AdminSession.create({
+  await AdminSession.create({
     adminId: admin._id,
     refreshTokenHash,
     deviceInfo: deviceInfo || "Unknown device",
@@ -210,7 +212,12 @@ export const createAdmin = async (adminData, createdByAdminId) => {
       });
     }
   }
-
+  emitAdminEvent(SOCKET_EVENTS.ADMIN_CREATED, {
+    adminId: admin._id,
+    email: admin.email,
+    name: admin.name,
+    role: admin.role,
+  });
   logger.info("Admin created", {
     adminId: admin._id,
     createdBy: createdByAdminId,

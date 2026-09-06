@@ -4,7 +4,8 @@ import { NotFoundError } from "../../errors/NotFoundError.js";
 import { AuthorizationError } from "../../errors/AuthorizationError.js";
 import { BadRequestError } from "../../errors/BadRequestError.js";
 import { logger } from "../../utils/logger.js";
-
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 export const getAdminById = async (adminId) => {
   const admin = await adminRepository.findById(adminId);
 
@@ -134,6 +135,11 @@ export const deactivateAdmin = async (adminId, actorAdminId) => {
 
   admin.isActive = false;
   await admin.save();
+  emitAdminEvent(SOCKET_EVENTS.ADMIN_DELETED, {
+    adminId,
+    email: admin.email,
+    name: admin.name,
+  });
 
   logger.info("Admin deactivated", { adminId, actorAdminId });
 
@@ -149,7 +155,12 @@ export const activateAdmin = async (adminId, actorAdminId) => {
 
   admin.isActive = true;
   await admin.save();
-
+  emitAdminEvent(SOCKET_EVENTS.ADMIN_CREATED, {
+    adminId: admin._id,
+    email: admin.email,
+    name: admin.name,
+    role: admin.role,
+  });
   logger.info("Admin activated", { adminId, actorAdminId });
 
   return admin.toSafeObject();
@@ -174,7 +185,9 @@ export const deleteAdmin = async (adminId, actorAdminId) => {
   }
 
   await adminRepository.deleteById(adminId);
-
+  emitAdminEvent(SOCKET_EVENTS.ADMIN_DELETED, {
+    adminId,
+  });
   logger.info("Admin deleted", { adminId, actorAdminId });
 
   return true;

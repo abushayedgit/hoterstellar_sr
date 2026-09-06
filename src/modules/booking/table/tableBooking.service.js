@@ -7,6 +7,8 @@ import { logger } from "../../../utils/logger.js";
 import { getBrevoClient } from "../../../config/brevo.js";
 import { tableBookingConfirmationTemplate } from "../../../emails/templates/tableBookingConfirmationTemplate.js";
 import { adminNewBookingNotificationTemplate } from "../../../emails/templates/adminNewBookingNotificationTemplate.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 const VALID_TRANSITIONS = {
   pending: ["confirmed", "cancelled", "no_show"],
@@ -136,7 +138,14 @@ export const createTableBooking = async (bookingData, userId = null) => {
       bookingId: booking._id,
       bookingNumber,
     });
-
+    emitAdminEvent(SOCKET_EVENTS.BOOKING_TABLE_NEW, {
+      bookingId: booking._id,
+      bookingNumber: booking.bookingNumber,
+      customerName: booking.customerName,
+      date: booking.date,
+      time: booking.time,
+      guestCount: booking.guestCount,
+    });
     return booking;
   } catch (error) {
     if (error.code === 11000) {
@@ -326,7 +335,20 @@ export const updateTableBookingStatus = async (
     note,
     tableNumber,
   );
-
+  if (newStatus === "cancelled") {
+    emitAdminEvent(SOCKET_EVENTS.BOOKING_TABLE_CANCELLED, {
+      bookingId,
+      bookingNumber: booking.bookingNumber,
+      status: newStatus,
+    });
+  } else {
+    emitAdminEvent(SOCKET_EVENTS.BOOKING_TABLE_UPDATED, {
+      bookingId,
+      bookingNumber: booking.bookingNumber,
+      status: newStatus,
+      tableNumber,
+    });
+  }
   logger.info("Table booking status updated", {
     bookingId,
     from: booking.status,
@@ -383,6 +405,12 @@ export const cancelTableBooking = async (
     null,
     reason,
   );
+
+  emitAdminEvent(SOCKET_EVENTS.BOOKING_TABLE_CANCELLED, {
+    bookingId,
+    bookingNumber: booking.bookingNumber,
+    reason,
+  });
 
   logger.info("Table booking cancelled", {
     bookingId,

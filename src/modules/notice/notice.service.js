@@ -9,6 +9,9 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { getCache, setCache, deleteCache } from "../../utils/cache.js";
 import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
 
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+
 let trackedNoticeCacheKeys = new Set();
 
 const invalidateAllNoticeCaches = async () => {
@@ -58,6 +61,12 @@ export const createNotice = async (noticeData, imageFile, adminId) => {
   logger.info("Notice created", {
     noticeId: notice._id,
     adminId,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.NOTICE_CREATED, {
+    noticeId: notice._id,
+    title: notice.title,
+    slug: notice.slug,
   });
 
   return notice;
@@ -271,6 +280,10 @@ export const deleteNotice = async (noticeId) => {
   await invalidateAllNoticeCaches();
 
   logger.info("Notice deleted", { noticeId });
+
+  emitAdminEvent(SOCKET_EVENTS.NOTICE_DELETED, {
+    noticeId,
+  });
 
   return true;
 };
