@@ -1,8 +1,6 @@
 import { Visitor } from "./visitor.model.js";
 import { PageTracking } from "./pageTracking.model.js";
 import { logger } from "../../utils/logger.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
 import axios from "axios";
 
 const getGeolocation = async (ip) => {
