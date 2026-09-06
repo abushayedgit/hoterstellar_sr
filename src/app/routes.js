@@ -12,6 +12,8 @@ import eventBookingRoutes from "../modules/booking/event/eventBooking.routes.js"
 import reviewRoutes from "../modules/review/review.routes.js";
 import noticeRoutes from "../modules/notice/notice.routes.js";
 import billboardRoutes from "../modules/billboard/billboard.routes.js";
+import visitorRoutes from "../modules/visitor/visitor.routes.js";
+import analyticsRoutes from "../modules/analytics/analytics.routes.js";
 
 export const apiRoutes = Router();
 
@@ -38,3 +40,5 @@ apiRoutes.use("/bookings/event", eventBookingRoutes);
 apiRoutes.use("/reviews", reviewRoutes);
 apiRoutes.use("/notices", noticeRoutes);
 apiRoutes.use("/billboards", billboardRoutes);
+apiRoutes.use("/visitors", visitorRoutes);
+apiRoutes.use("/analytics", analyticsRoutes);
