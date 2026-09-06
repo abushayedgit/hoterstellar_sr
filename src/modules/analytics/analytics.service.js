@@ -8,7 +8,6 @@ import { PageTracking } from "../visitor/pageTracking.model.js";
 import { AnalyticsDeletionConfirmation } from "./analytics.model.js";
 import { env } from "../../config/env.js";
 import { logger } from "../../utils/logger.js";
-import { getCache, setCache } from "../../utils/cache.js";
 import { hashToken, generateOTP } from "../../utils/token.utils.js";
 import { getBrevoClient } from "../../config/brevo.js";
 import { BadRequestError } from "../../errors/BadRequestError.js";
@@ -61,13 +60,6 @@ const getDateRange = (period, year, month, day) => {
 export const getOrderAnalytics = async (query) => {
   const { period, year, month, day } = query;
   const { startDate, endDate } = getDateRange(period, year, month, day);
-
-  const cacheKey = `cache:analytics:orders:${period}:${year || ""}:${month || ""}:${day || ""}`;
-
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const [orderStats, statusBreakdown, typeBreakdown, dailyOrders] =
     await Promise.all([
@@ -124,21 +116,12 @@ export const getOrderAnalytics = async (query) => {
     dailyOrders,
   };
 
-  await setCache(cacheKey, data, 300);
-
   return data;
 };
 
 export const getFoodAnalytics = async (query) => {
   const { period, year, month, day } = query;
   const { startDate, endDate } = getDateRange(period, year, month, day);
-
-  const cacheKey = `cache:analytics:foods:${period}:${year || ""}:${month || ""}:${day || ""}`;
-
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const [topFoods, categoryBreakdown, foodRatings] = await Promise.all([
     Order.aggregate([
@@ -220,21 +203,12 @@ export const getFoodAnalytics = async (query) => {
     foodRatings,
   };
 
-  await setCache(cacheKey, data, 300);
-
   return data;
 };
 
 export const getBookingAnalytics = async (query) => {
   const { period, year, month, day } = query;
   const { startDate, endDate } = getDateRange(period, year, month, day);
-
-  const cacheKey = `cache:analytics:bookings:${period}:${year || ""}:${month || ""}:${day || ""}`;
-
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const [tableStats, eventStats] = await Promise.all([
     TableBooking.aggregate([
@@ -286,21 +260,12 @@ export const getBookingAnalytics = async (query) => {
     },
   };
 
-  await setCache(cacheKey, data, 300);
-
   return data;
 };
 
 export const getReviewAnalytics = async (query) => {
   const { period, year, month, day } = query;
   const { startDate, endDate } = getDateRange(period, year, month, day);
-
-  const cacheKey = `cache:analytics:reviews:${period}:${year || ""}:${month || ""}:${day || ""}`;
-
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const [ratingBreakdown, typeBreakdown, totalReviews] = await Promise.all([
     Review.aggregate([
@@ -340,21 +305,12 @@ export const getReviewAnalytics = async (query) => {
     typeBreakdown,
   };
 
-  await setCache(cacheKey, data, 300);
-
   return data;
 };
 
 export const getIncomeAnalytics = async (query) => {
   const { period, year, month, day } = query;
   const { startDate, endDate } = getDateRange(period, year, month, day);
-
-  const cacheKey = `cache:analytics:income:${period}:${year || ""}:${month || ""}:${day || ""}`;
-
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const [orderIncome, bookingIncome] = await Promise.all([
     Order.aggregate([
@@ -410,8 +366,6 @@ export const getIncomeAnalytics = async (query) => {
     totalIncome: totalOrderRevenue + totalBookingDeposit,
     dailyIncome: orderIncome,
   };
-
-  await setCache(cacheKey, data, 300);
 
   return data;
 };
