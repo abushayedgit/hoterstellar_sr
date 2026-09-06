@@ -28,6 +28,7 @@ import {
   cancelEventBookingController,
 } from "./eventBooking.controller.js";
 import { auditLog } from "../../../middlewares/auditLog.middleware.js";
+import { recaptchaMiddleware } from "../../../middlewares/recaptcha.middleware.js";
 
 const router = Router();
 
@@ -42,6 +43,7 @@ const adminAuth = createAuthMiddleware(env.ADMIN_JWT_SECRET, async (adminId) =>
 router.post(
   "/",
   optionalAuthMiddleware,
+  recaptchaMiddleware,
   validateBody(createEventBookingSchema),
   createEventBookingController,
 );
