@@ -63,9 +63,10 @@ export const updateBillboardController = async (req, res, next) => {
 export const addCarouselItemController = async (req, res, next) => {
   try {
     const carouselItem = req.body;
+    const imageFile = req.file;
     const adminId = req.auth.adminId;
 
-    const billboard = await addCarouselItem(carouselItem, adminId);
+    const billboard = await addCarouselItem(carouselItem, imageFile, adminId);
 
     return res.status(201).json({
       success: true,
@@ -83,9 +84,15 @@ export const updateCarouselItemController = async (req, res, next) => {
   try {
     const { imgId } = req.params;
     const updateData = req.body;
+    const imageFile = req.file;
     const adminId = req.auth.adminId;
 
-    const billboard = await updateCarouselItem(imgId, updateData, adminId);
+    const billboard = await updateCarouselItem(
+      imgId,
+      updateData,
+      imageFile,
+      adminId,
+    );
 
     return res.status(200).json({
       success: true,
@@ -140,9 +147,14 @@ export const reorderCarouselsController = async (req, res, next) => {
 export const updatePopupImageController = async (req, res, next) => {
   try {
     const popupImageData = req.body;
+    const imageFile = req.file;
     const adminId = req.auth.adminId;
 
-    const billboard = await updatePopupImage(popupImageData, adminId);
+    const billboard = await updatePopupImage(
+      popupImageData,
+      imageFile,
+      adminId,
+    );
 
     return res.status(200).json({
       success: true,

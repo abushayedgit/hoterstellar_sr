@@ -9,8 +9,9 @@ import {
 export const createFoodController = async (req, res, next) => {
   try {
     const foodData = req.body;
+    const imageFiles = req.files;
 
-    const food = await createFood(foodData);
+    const food = await createFood(foodData, imageFiles);
 
     return res.status(201).json({
       success: true,
@@ -62,8 +63,9 @@ export const updateFoodController = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const imageFiles = req.files;
 
-    const food = await updateFood(id, updateData);
+    const food = await updateFood(id, updateData, imageFiles);
 
     return res.status(200).json({
       success: true,

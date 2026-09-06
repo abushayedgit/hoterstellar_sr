@@ -22,10 +22,10 @@ import {
   deleteFoodController,
 } from "./food.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { uploadMultiple } from "../../middlewares/upload.middleware.js";
 
 const router = Router();
 
-// Admin authentication middleware
 const adminAuth = createAuthMiddleware(
   env.ADMIN_JWT_SECRET,
   async (adminId) => {
@@ -33,15 +33,16 @@ const adminAuth = createAuthMiddleware(
   },
 );
 
-// Public routes
+// Public routes (service handles caching)
 router.get("/", validateQuery(foodQuerySchema), listFoodsController);
 router.get("/:id", validateObjectIdParam("id"), getFoodController);
 
-// Admin routes
+// Admin routes (no cache)
 router.post(
   "/",
   adminAuth,
   requirePermission(PERMISSIONS.FOODS_CREATE),
+  uploadMultiple,
   validateBody(createFoodSchema),
   auditLog("food.create"),
   createFoodController,
@@ -52,6 +53,7 @@ router.put(
   adminAuth,
   requirePermission(PERMISSIONS.FOODS_UPDATE),
   validateObjectIdParam("id"),
+  uploadMultiple,
   validateBody(updateFoodSchema),
   auditLog("food.update"),
   updateFoodController,

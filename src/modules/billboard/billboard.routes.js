@@ -23,10 +23,10 @@ import {
   updatePopupImageController,
 } from "./billboard.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { uploadSingle } from "../../middlewares/upload.middleware.js";
 
 const router = Router();
 
-// Admin authentication middleware
 const adminAuth = createAuthMiddleware(
   env.ADMIN_JWT_SECRET,
   async (adminId) => {
@@ -34,16 +34,17 @@ const adminAuth = createAuthMiddleware(
   },
 );
 
-// Public route
+// Public routes (service handles caching)
 router.get("/public", getPublicBillboardController);
 
-// Admin routes (all require auth + permission)
+// Admin routes (no cache)
 router.get(
   "/",
   adminAuth,
   requirePermission(PERMISSIONS.BILLBOARD_MANAGE),
   getBillboardController,
 );
+
 router.put(
   "/",
   adminAuth,
@@ -53,23 +54,26 @@ router.put(
   updateBillboardController,
 );
 
-// Carousel item management
 router.post(
   "/carousels",
   adminAuth,
   requirePermission(PERMISSIONS.BILLBOARD_MANAGE),
+  uploadSingle,
   validateBody(addCarouselItemSchema),
   auditLog("billboard.carousel.add"),
   addCarouselItemController,
 );
+
 router.put(
   "/carousels/:imgId",
   adminAuth,
   requirePermission(PERMISSIONS.BILLBOARD_MANAGE),
+  uploadSingle,
   validateBody(updateCarouselItemSchema),
   auditLog("billboard.carousel.update"),
   updateCarouselItemController,
 );
+
 router.delete(
   "/carousels/:imgId",
   adminAuth,
@@ -77,6 +81,7 @@ router.delete(
   auditLog("billboard.carousel.remove"),
   removeCarouselItemController,
 );
+
 router.put(
   "/carousels/reorder",
   adminAuth,
@@ -86,12 +91,11 @@ router.put(
   reorderCarouselsController,
 );
 
-// Popup image management
 router.put(
   "/popup",
   adminAuth,
   requirePermission(PERMISSIONS.BILLBOARD_MANAGE),
-  validateBody(popupUpdateSchema.pick({ billBoardImg: true })),
+  uploadSingle,
   auditLog("billboard.popup.update"),
   updatePopupImageController,
 );
