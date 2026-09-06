@@ -9,8 +9,9 @@ import cartRoutes from "../modules/cart/cart.routes.js";
 import orderRoutes from "../modules/order/order.routes.js";
 import tableBookingRoutes from "../modules/booking/table/tableBooking.routes.js";
 import eventBookingRoutes from "../modules/booking/event/eventBooking.routes.js";
-import noticeRoutes from "../modules/notice/notice.routes.js";
 import reviewRoutes from "../modules/review/review.routes.js";
+import noticeRoutes from "../modules/notice/notice.routes.js";
+import billboardRoutes from "../modules/billboard/billboard.routes.js";
 
 export const apiRoutes = Router();
 
@@ -34,5 +35,6 @@ apiRoutes.use("/cart", cartRoutes);
 apiRoutes.use("/orders", orderRoutes);
 apiRoutes.use("/bookings/table", tableBookingRoutes);
 apiRoutes.use("/bookings/event", eventBookingRoutes);
-apiRoutes.use("/notices", noticeRoutes);
 apiRoutes.use("/reviews", reviewRoutes);
+apiRoutes.use("/notices", noticeRoutes);
+apiRoutes.use("/billboards", billboardRoutes);
