@@ -7,8 +7,8 @@ import { logger } from "../../../utils/logger.js";
 import { getBrevoClient } from "../../../config/brevo.js";
 import { tableBookingConfirmationTemplate } from "../../../emails/templates/tableBookingConfirmationTemplate.js";
 import { adminNewBookingNotificationTemplate } from "../../../emails/templates/adminNewBookingNotificationTemplate.js";
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { emitAdminEvent } from "../../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../../constants/socketEvents.js";
 
 const VALID_TRANSITIONS = {
   pending: ["confirmed", "cancelled", "no_show"],
