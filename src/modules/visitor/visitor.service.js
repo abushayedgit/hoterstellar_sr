@@ -2,6 +2,8 @@ import { Visitor } from "./visitor.model.js";
 import { PageTracking } from "./pageTracking.model.js";
 import { logger } from "../../utils/logger.js";
 import axios from "axios";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 const getGeolocation = async (ip) => {
   if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") {
@@ -88,6 +90,21 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
     }
 
     await existingVisitor.save();
+
+    if (consentStatus === "accepted") {
+      emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_ACCEPTED, {
+        guestId,
+      });
+    } else if (consentStatus === "declined") {
+      emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_DECLINED, {
+        guestId,
+      });
+    } else {
+      emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_PENDING, {
+        guestId,
+      });
+    }
+
     return existingVisitor;
   }
 
@@ -114,6 +131,19 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
   const visitor = await Visitor.create(visitorData);
 
   logger.info("Visitor tracked", { guestId, consentStatus });
+
+  emitAdminEvent(SOCKET_EVENTS.VISITOR_NEW, {
+    guestId,
+    consentStatus,
+  });
+
+  if (consentStatus === "accepted") {
+    emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_ACCEPTED, { guestId });
+  } else if (consentStatus === "declined") {
+    emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_DECLINED, { guestId });
+  } else {
+    emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_PENDING, { guestId });
+  }
 
   return visitor;
 };

@@ -9,6 +9,9 @@ import { BadRequestError } from "../../errors/BadRequestError.js";
 import { ConflictError } from "../../errors/ConflictError.js";
 import { logger } from "../../utils/logger.js";
 
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+
 const updateFoodRating = async (foodId) => {
   const result = await reviewRepository.getAverageRatingForFood(foodId);
 
@@ -72,6 +75,13 @@ export const createFoodReview = async (userId, reviewData) => {
 
   logger.info("Food review created", { reviewId: review._id, userId, foodId });
 
+  emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
+    reviewId: review._id,
+    type: "food",
+    foodId,
+    rating,
+  });
+
   return review;
 };
 
@@ -118,6 +128,13 @@ export const createTableReview = async (userId, reviewData) => {
     reviewId: review._id,
     userId,
     tableBookingId: tableBookingId || null,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
+    reviewId: review._id,
+    type: "table",
+    tableBookingId: tableBookingId || null,
+    rating,
   });
 
   return review;
@@ -167,7 +184,12 @@ export const createEventReview = async (userId, reviewData) => {
     userId,
     eventBookingId: eventBookingId || null,
   });
-
+  emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
+    reviewId: review._id,
+    type: "event",
+    eventBookingId: eventBookingId || null,
+    rating,
+  });
   return review;
 };
 

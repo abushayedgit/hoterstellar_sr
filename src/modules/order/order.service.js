@@ -8,6 +8,8 @@ import { BadRequestError } from "../../errors/BadRequestError.js";
 import { ConflictError } from "../../errors/ConflictError.js";
 import { logger } from "../../utils/logger.js";
 import { getBrevoClient } from "../../config/brevo.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 const VALID_TRANSITIONS = {
   pending: ["confirmed", "cancelled"],
@@ -151,6 +153,15 @@ export const createOrder = async (userId, orderData) => {
 
   logger.info("Order created", { orderId: order._id, orderNumber, userId });
 
+  emitAdminEvent(SOCKET_EVENTS.ORDER_NEW, {
+    orderId: order._id,
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    totalAmount: order.totalAmount,
+    orderType: order.orderType,
+    status: order.status,
+  });
+
   return order;
 };
 
@@ -282,6 +293,21 @@ export const updateOrderStatus = async (
     note,
   );
 
+  if (newStatus === "confirmed") {
+    emitAdminEvent(SOCKET_EVENTS.ORDER_CONFIRMED, {
+      orderId,
+      orderNumber: order.orderNumber,
+      status: newStatus,
+    });
+  } else if (newStatus === "cancelled") {
+    emitAdminEvent(SOCKET_EVENTS.ORDER_CANCELLED, {
+      orderId,
+      orderNumber: order.orderNumber,
+      status: newStatus,
+      reason: note,
+    });
+  }
+
   logger.info("Order status updated", {
     orderId,
     from: order.status,
@@ -316,6 +342,12 @@ export const cancelOrder = async (orderId, userId = null, reason = "") => {
     null,
     reason,
   );
+
+  emitAdminEvent(SOCKET_EVENTS.ORDER_CANCELLED, {
+    orderId,
+    orderNumber: order.orderNumber,
+    reason,
+  });
 
   logger.info("Order cancelled", { orderId, userId, reason });
 

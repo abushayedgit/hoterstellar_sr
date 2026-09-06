@@ -8,6 +8,9 @@ import { generateSlug } from "../../utils/slug.js";
 import { getCache, setCache, deleteCache } from "../../utils/cache.js";
 import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
 
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+
 let trackedFoodCacheKeys = new Set();
 
 const invalidateAllFoodCaches = async () => {
@@ -129,6 +132,13 @@ export const listFoods = async (query) => {
   trackedFoodCacheKeys.add(cacheKey);
   await setCache(cacheKey, data, 60);
 
+  emitAdminEvent(SOCKET_EVENTS.FOOD_CREATED, {
+    foodId: food._id,
+    name: food.name,
+    slug: food.slug,
+    price: food.price,
+  });
+
   return data;
 };
 
@@ -200,6 +210,13 @@ export const updateFood = async (foodId, updateData, imageFiles) => {
 
   logger.info("Food updated", { foodId });
 
+  emitAdminEvent(SOCKET_EVENTS.FOOD_UPDATED, {
+    foodId,
+    name: food.name,
+    slug: food.slug,
+    price: food.price,
+  });
+
   return food;
 };
 
@@ -219,6 +236,10 @@ export const deleteFood = async (foodId) => {
 
   await deleteCache(`cache:foods:${foodId}`);
   await invalidateAllFoodCaches();
+
+  emitAdminEvent(SOCKET_EVENTS.FOOD_DELETED, {
+    foodId,
+  });
 
   logger.info("Food deleted", { foodId });
 

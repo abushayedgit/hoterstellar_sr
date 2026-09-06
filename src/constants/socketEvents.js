@@ -22,4 +22,8 @@ export const SOCKET_EVENTS = {
   VISITOR_CONSENT_PENDING: "visitor:consent:pending",
   VISITOR_CONSENT_ACCEPTED: "visitor:consent:accepted",
   VISITOR_CONSENT_DECLINED: "visitor:consent:declined",
+
+  NOTICE_CREATED: "notice:created",
+  NOTICE_UPDATED: "notice:updated",
+  NOTICE_DELETED: "notice:deleted",
 };

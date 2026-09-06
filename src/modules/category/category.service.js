@@ -7,6 +7,8 @@ import { logger } from "../../utils/logger.js";
 import { generateSlug } from "../../utils/slug.js";
 import { getCache, setCache, deleteCache } from "../../utils/cache.js";
 import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
+import { emitAdminEvent } from "../../utils/socketEmitter.js";
+import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
 
 let trackedCategoryCacheKeys = new Set();
 
@@ -55,6 +57,12 @@ export const createCategory = async (categoryData, imageFile) => {
   await invalidateAllCategoryCaches();
 
   logger.info("Category created", { categoryId: category._id });
+
+  emitAdminEvent(SOCKET_EVENTS.CATEGORY_CREATED, {
+    categoryId: category._id,
+    name: category.name,
+    slug: category.slug,
+  });
 
   return category;
 };
@@ -167,6 +175,12 @@ export const updateCategory = async (categoryId, updateData, imageFile) => {
 
   logger.info("Category updated", { categoryId });
 
+  emitAdminEvent(SOCKET_EVENTS.CATEGORY_UPDATED, {
+    categoryId,
+    name: category.name,
+    slug: category.slug,
+  });
+
   return category;
 };
 
@@ -193,6 +207,10 @@ export const deleteCategory = async (categoryId) => {
 
   await deleteCache(`cache:categories:${categoryId}`);
   await invalidateAllCategoryCaches();
+
+  emitAdminEvent(SOCKET_EVENTS.CATEGORY_DELETED, {
+    categoryId,
+  });
 
   logger.info("Category deleted", { categoryId });
 
