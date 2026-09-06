@@ -23,6 +23,7 @@ import {
   deleteAdminController,
 } from "./admin.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { adminDestructiveRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -84,6 +85,7 @@ router.patch(
 // Delete admin (super_admin only)
 router.delete(
   "/:id",
+  adminDestructiveRateLimiter,
   requireRoles([ROLES.SUPER_ADMIN]),
   validateObjectIdParam("id"),
   auditLog("admin.delete"),

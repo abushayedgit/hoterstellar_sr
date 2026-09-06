@@ -23,6 +23,7 @@ import {
 } from "./contact.controller.js";
 import { mutationRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
+import { adminDestructiveRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -70,6 +71,7 @@ router.patch(
 
 router.delete(
   "/:id",
+  adminDestructiveRateLimiter,
   adminAuth,
   requirePermission(PERMISSIONS.USERS_DELETE),
   validateObjectIdParam("id"),

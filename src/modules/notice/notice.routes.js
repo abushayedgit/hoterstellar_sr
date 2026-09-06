@@ -27,6 +27,7 @@ import {
 } from "./notice.controller.js";
 import { auditLog } from "../../middlewares/auditLog.middleware.js";
 import { uploadSingle } from "../../middlewares/upload.middleware.js";
+import { adminDestructiveRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -82,6 +83,7 @@ router.put(
 
 router.delete(
   "/:id",
+  adminDestructiveRateLimiter,
   adminAuth,
   requirePermission(PERMISSIONS.NOTICES_MANAGE),
   validateObjectIdParam("id"),
