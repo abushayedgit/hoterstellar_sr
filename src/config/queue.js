@@ -1,9 +1,12 @@
 import { Queue, Worker } from "bullmq";
-import { isRedisReady } from "./redis.js";
+import { Redis } from "ioredis";
+import { env } from "./env.js";
 import { logger } from "../utils/logger.js";
 
 let queues = {};
 let workers = {};
+let sharedConnection = null;
+let connectionReadyPromise = null;
 
 export const QUEUE_NAMES = {
   EMAIL: "email",
@@ -11,36 +14,140 @@ export const QUEUE_NAMES = {
   MEDIA_CLEANUP: "mediaCleanup",
 };
 
-export const getQueue = (queueName) => {
-  if (!isRedisReady()) {
-    logger.warn(`Redis not ready, queue ${queueName} unavailable`);
+/**
+ * Wait for BullMQ Redis connection to be ready
+ */
+const waitForConnection = async () => {
+  if (!sharedConnection) {
+    return false;
+  }
+
+  if (sharedConnection.status === "ready") {
+    return true;
+  }
+
+  if (
+    sharedConnection.status === "connecting" ||
+    sharedConnection.status === "connect"
+  ) {
+    try {
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Redis connection timeout"));
+        }, 10000);
+
+        sharedConnection.once("ready", () => {
+          clearTimeout(timeout);
+          resolve();
+        });
+
+        sharedConnection.once("error", (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        });
+      });
+      return true;
+    } catch (error) {
+      logger.error(`Failed to wait for Redis connection: ${error.message}`);
+      return false;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Get or create a SINGLE shared native Redis connection for BullMQ
+ */
+const getSharedConnection = () => {
+  if (sharedConnection && sharedConnection.status === "ready") {
+    return sharedConnection;
+  }
+
+  if (!env.UPSTASH_REDIS_NATIVE_URL) {
+    logger.warn(
+      "UPSTASH_REDIS_NATIVE_URL not set. BullMQ requires native Redis connection.",
+    );
+    return null;
+  }
+
+  if (!sharedConnection) {
+    try {
+      sharedConnection = new Redis(env.UPSTASH_REDIS_NATIVE_URL, {
+        maxRetriesPerRequest: null,
+        enableReadyCheck: true,
+        connectTimeout: 10000,
+        lazyConnect: false,
+        retryStrategy(times) {
+          if (times > 3) {
+            logger.warn("BullMQ Redis giving up after 3 retries");
+            return null;
+          }
+          const delay = Math.min(times * 2000, 6000);
+          logger.warn(`BullMQ Redis retry ${times} in ${delay}ms`);
+          return delay;
+        },
+      });
+
+      sharedConnection.on("connect", () => {
+        logger.info("BullMQ Redis connected");
+      });
+
+      sharedConnection.on("ready", () => {
+        logger.info("BullMQ Redis ready for operations");
+      });
+
+      sharedConnection.on("error", (error) => {
+        logger.error(`BullMQ Redis error: ${error.message}`);
+      });
+
+      sharedConnection.on("close", () => {
+        logger.warn("BullMQ Redis connection closed");
+        sharedConnection = null;
+      });
+    } catch (error) {
+      logger.error(
+        `Failed to create BullMQ Redis connection: ${error.message}`,
+      );
+      return null;
+    }
+  }
+
+  return sharedConnection;
+};
+
+export const getQueue = async (queueName) => {
+  const connection = getSharedConnection();
+
+  if (!connection) {
+    logger.warn(`BullMQ Redis not available, queue ${queueName} unavailable`);
+    return null;
+  }
+
+  // Wait for connection to be ready
+  const isReady = await waitForConnection();
+  if (!isReady) {
+    logger.warn(`BullMQ Redis not ready, queue ${queueName} unavailable`);
     return null;
   }
 
   if (!queues[queueName]) {
     try {
       queues[queueName] = new Queue(queueName, {
-        connection: {
-          url:
-            process.env.UPSTASH_REDIS_NATIVE_URL ||
-            process.env.UPSTASH_REDIS_REST_URL,
-          token: process.env.UPSTASH_REDIS_REST_TOKEN,
-        },
+        connection,
         defaultJobOptions: {
-          attempts: 5,
+          attempts: 3,
           backoff: {
             type: "exponential",
-            delay: 10000,
+            delay: 5000,
           },
-          removeOnComplete: 100,
-          removeOnFail: 500,
+          removeOnComplete: 50,
+          removeOnFail: 200,
         },
       });
-      logger.info(`Queue initialized: ${queueName}`);
+      logger.info(`✓ Queue initialized: ${queueName}`);
     } catch (error) {
-      logger.error(`Failed to initialize queue ${queueName}`, {
-        error: error.message,
-      });
+      logger.error(`Failed to initialize queue ${queueName}: ${error.message}`);
       return null;
     }
   }
@@ -48,39 +155,47 @@ export const getQueue = (queueName) => {
   return queues[queueName];
 };
 
-export const getWorker = (queueName, processor, concurrency = 5) => {
-  if (!isRedisReady()) {
-    logger.warn(`Redis not ready, worker ${queueName} unavailable`);
+export const getWorker = async (queueName, processor, concurrency = 3) => {
+  const connection = getSharedConnection();
+
+  if (!connection) {
+    logger.warn(`BullMQ Redis not available, worker ${queueName} unavailable`);
+    return null;
+  }
+
+  // Wait for connection to be ready
+  const isReady = await waitForConnection();
+  if (!isReady) {
+    logger.warn(`BullMQ Redis not ready, worker ${queueName} unavailable`);
     return null;
   }
 
   if (!workers[queueName]) {
     try {
       workers[queueName] = new Worker(queueName, processor, {
-        connection: {
-          url:
-            process.env.UPSTASH_REDIS_NATIVE_URL ||
-            process.env.UPSTASH_REDIS_REST_URL,
-          token: process.env.UPSTASH_REDIS_REST_TOKEN,
-        },
+        connection,
         concurrency,
       });
 
       workers[queueName].on("completed", (job) => {
-        logger.info(`Job completed: ${queueName}:${job.id}`);
+        logger.info(`✓ Job completed: ${queueName}:${job.id}`);
       });
 
       workers[queueName].on("failed", (job, error) => {
-        logger.error(`Job failed: ${queueName}:${job?.id}`, {
-          error: error.message,
-        });
+        logger.error(
+          `✗ Job failed: ${queueName}:${job?.id} - ${error.message}`,
+        );
       });
 
-      logger.info(`Worker initialized: ${queueName}`);
-    } catch (error) {
-      logger.error(`Failed to initialize worker ${queueName}`, {
-        error: error.message,
+      workers[queueName].on("error", (error) => {
+        logger.error(`✗ Worker error: ${queueName} - ${error.message}`);
       });
+
+      logger.info(`✓ Worker initialized: ${queueName}`);
+    } catch (error) {
+      logger.error(
+        `Failed to initialize worker ${queueName}: ${error.message}`,
+      );
       return null;
     }
   }
@@ -89,21 +204,19 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
 };
 
 export const enqueueJob = async (queueName, jobName, data, options = {}) => {
-  const queue = getQueue(queueName);
+  const queue = await getQueue(queueName);
 
   if (!queue) {
-    logger.warn(`Queue ${queueName} not available, job not enqueued`);
+    logger.warn(`Queue ${queueName} not available`);
     return null;
   }
 
   try {
     const job = await queue.add(jobName, data, options);
-    logger.info(`Job enqueued: ${queueName}:${jobName}:${job.id}`);
+    logger.info(`✓ Job enqueued: ${queueName}:${job.id}`);
     return job;
   } catch (error) {
-    logger.error(`Failed to enqueue job ${queueName}:${jobName}`, {
-      error: error.message,
-    });
+    logger.error(`Failed to enqueue job: ${error.message}`);
     return null;
   }
 };
@@ -114,9 +227,7 @@ export const closeAllQueues = async () => {
       await queues[queueName].close();
       logger.info(`Queue closed: ${queueName}`);
     } catch (error) {
-      logger.warn(`Failed to close queue ${queueName}`, {
-        error: error.message,
-      });
+      logger.warn(`Failed to close queue ${queueName}`);
     }
   }
   queues = {};
@@ -128,10 +239,20 @@ export const closeAllWorkers = async () => {
       await workers[workerName].close();
       logger.info(`Worker closed: ${workerName}`);
     } catch (error) {
-      logger.warn(`Failed to close worker ${workerName}`, {
-        error: error.message,
-      });
+      logger.warn(`Failed to close worker ${workerName}`);
     }
   }
   workers = {};
+};
+
+export const closeBullMQConnection = async () => {
+  if (sharedConnection) {
+    try {
+      await sharedConnection.quit();
+      logger.info("BullMQ Redis connection closed");
+    } catch (error) {
+      logger.warn("Failed to close BullMQ Redis connection");
+    }
+    sharedConnection = null;
+  }
 };
