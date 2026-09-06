@@ -14,6 +14,7 @@ import noticeRoutes from "../modules/notice/notice.routes.js";
 import billboardRoutes from "../modules/billboard/billboard.routes.js";
 import visitorRoutes from "../modules/visitor/visitor.routes.js";
 import analyticsRoutes from "../modules/analytics/analytics.routes.js";
+import contactRoutes from "../modules/contact/contact.routes.js";
 
 export const apiRoutes = Router();
 
@@ -42,3 +43,5 @@ apiRoutes.use("/notices", noticeRoutes);
 apiRoutes.use("/billboards", billboardRoutes);
 apiRoutes.use("/visitors", visitorRoutes);
 apiRoutes.use("/analytics", analyticsRoutes);
+
+apiRoutes.use("/contact", contactRoutes);

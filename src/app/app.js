@@ -11,6 +11,10 @@ import {
 } from "../middlewares/security.middleware.js";
 import { globalRateLimiter } from "../middlewares/rateLimiter.middleware.js";
 import { apiRoutes } from "./routes.js";
+import {
+  setCsrfCookie,
+  csrfProtection,
+} from "../middlewares/csrf.middleware.js";
 
 const app = express();
 
@@ -104,4 +108,10 @@ app.use((req, res) => {
 
 app.use(errorHandlerMiddleware);
 
+// After cookie parser (if using), before routes
+app.use(setCsrfCookie);
+
+// Apply CSRF protection to auth refresh endpoints
+app.use("/api/v1/auth/admin/refresh", csrfProtection);
+app.use("/api/v1/auth/user/refresh", csrfProtection);
 export default app;
