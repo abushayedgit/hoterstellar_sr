@@ -49,7 +49,7 @@ jobs:
             paths-ignore:
               - '**/*.test.js'
               - '**/*.spec.js'
-              - 'tests/**'
+              - 'node_modules/**'
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4
