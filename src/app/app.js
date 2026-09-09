@@ -86,7 +86,6 @@ app.get('/ready', async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
     return res.status(503).json({
       success: false,
       statusCode: 503,
