@@ -1,0 +1,26 @@
+export default {
+  testEnvironment: "node",
+  transform: {},
+  extensionsToTreatAsEsm: [".js"],
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
+  testMatch: ["**/tests/**/*.test.js"],
+  collectCoverageFrom: [
+    "src/**/*.js",
+    "!src/**/*.model.js",
+    "!src/**/*.repository.js",
+    "!src/app/**",
+    "!src/config/**",
+    "!src/emails/**",
+    "!src/jobs/**",
+    "!src/seeders/**",
+    "!server.js",
+    "!worker.js",
+  ],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov"],
+  verbose: true,
+  testTimeout: 30000,
+};
