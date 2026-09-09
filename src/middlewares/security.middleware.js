@@ -34,7 +34,7 @@ export const sanitizeRequestMiddleware = (req, res, next) => {
     for (const key in obj) {
       if (typeof obj[key] === 'string') {
         // Remove null bytes and control characters
-        obj[key] = obj[key].replace(/[\u0000-\u001F\u007F]/g, '');
+        obj[key] = obj[key].replace(/[\p{Cc}]/gu, '');
       } else if (typeof obj[key] === 'object') {
         sanitize(obj[key]);
       }
