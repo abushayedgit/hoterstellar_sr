@@ -1,0 +1,85 @@
+services:
+  - type: web
+    name: hoterstellar-api
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_JWT_SECRET
+        sync: false
+      - key: USER_JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: UPSTASH_REDIS_NATIVE_URL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        sync: false
+      - key: IMAGEKIT_PUBLIC_KEY
+        sync: false
+      - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+      - key: IMAGEKIT_URL_ENDPOINT
+        sync: false
+      - key: RECAPTCHA_SECRET_KEY
+        sync: false
+      - key: RECAPTCHA_SITE_KEY
+        sync: false
+      - key: BUSINESS_TIMEZONE
+        value: Asia/Dhaka
+      - key: CLIENT_PUBLIC_URL
+        sync: false
+      - key: CLIENT_DASHBOARD_URL
+        sync: false
+      - key: ADMIN_NOTIFICATION_EMAILS
+        sync: false
+
+  - type: worker
+    name: hoterstellar-worker
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node worker.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: UPSTASH_REDIS_NATIVE_URL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        sync: false
+      - key: IMAGEKIT_PUBLIC_KEY
+        sync: false
+      - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+      - key: IMAGEKIT_URL_ENDPOINT
+        sync: false
+      - key: ADMIN_NOTIFICATION_EMAILS
+        sync: false
