@@ -1,9 +1,4 @@
-export const baseLayout = ({
-  title,
-  preheader,
-  content,
-  year = new Date().getFullYear(),
-}) => {
+export const baseLayout = ({ title, preheader, content, year = new Date().getFullYear() }) => {
   return `
 <!DOCTYPE html>
 <html lang="en">

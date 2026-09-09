@@ -5,9 +5,9 @@ on:
     branches:
       - main
       - develop
-      - "feature/**"
-      - "fix/**"
-      - "refactor/**"
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
 
   pull_request:
     branches:
@@ -48,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Verify package
-        run: npm --version
+      - name: Run ESLint
+        run: npm run lint
 
       - name: Security audit
         if: matrix.node-version == '22.x'
