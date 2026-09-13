@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../../models/base.model.js';
 
 const adminSessionSchema = new mongoose.Schema(
   {
     adminId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: 'Admin',
       required: true,
       index: true,
     },
@@ -16,7 +16,7 @@ const adminSessionSchema = new mongoose.Schema(
     },
     deviceInfo: {
       type: String,
-      default: "",
+      default: '',
     },
     issuedAt: {
       type: Date,
@@ -33,7 +33,7 @@ const adminSessionSchema = new mongoose.Schema(
     },
     replacedBySessionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "AdminSession",
+      ref: 'AdminSession',
       default: null,
     },
   },
@@ -46,4 +46,4 @@ adminSessionSchema.methods.isActive = function () {
   return !this.revokedAt && this.expiresAt > new Date();
 };
 
-export const AdminSession = mongoose.model("AdminSession", adminSessionSchema);
+export const AdminSession = mongoose.model('AdminSession', adminSessionSchema);

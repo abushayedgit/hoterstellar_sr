@@ -1,4 +1,4 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const adminNewBookingNotificationTemplate = ({
   bookingNumber,
@@ -7,8 +7,8 @@ export const adminNewBookingNotificationTemplate = ({
   dateTime,
   guestCount,
 }) => {
-  const isTable = bookingType === "table";
-  const title = isTable ? "New Table Reservation" : "New Event Booking";
+  const isTable = bookingType === 'table';
+  const title = isTable ? 'New Table Reservation' : 'New Event Booking';
 
   const content = `
     <p class="content-text">New ${bookingType} booking received:</p>

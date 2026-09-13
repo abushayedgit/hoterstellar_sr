@@ -1,34 +1,34 @@
-import pino from "pino";
-import chalk from "chalk";
-import { env } from "../config/env.js";
+import pino from 'pino';
+import chalk from 'chalk';
+import { env } from '../config/env.js';
 
 const loggerConfig = {
-  level: env.NODE_ENV === "development" ? "debug" : "info",
+  level: env.NODE_ENV === 'development' ? 'debug' : 'info',
   redact: {
     paths: [
-      "password",
-      "accessToken",
-      "refreshToken",
-      "otp",
-      "token",
-      "req.headers.authorization",
-      "req.headers.cookie",
+      'password',
+      'accessToken',
+      'refreshToken',
+      'otp',
+      'token',
+      'req.headers.authorization',
+      'req.headers.cookie',
     ],
-    censor: "***",
+    censor: '***',
   },
 };
 
 const pinoLogger = pino(
-  env.NODE_ENV === "development"
+  env.NODE_ENV === 'development'
     ? {
         ...loggerConfig,
         transport: {
-          target: "pino-pretty",
+          target: 'pino-pretty',
           options: {
             colorize: true,
-            translateTime: "HH:MM:ss",
-            ignore: "pid,hostname",
-            messageFormat: "{msg}",
+            translateTime: 'HH:MM:ss',
+            ignore: 'pid,hostname',
+            messageFormat: '{msg}',
           },
         },
       }
@@ -37,28 +37,28 @@ const pinoLogger = pino(
 
 export const logger = {
   info: (message, ...args) => {
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       pinoLogger.info(message);
     } else {
       pinoLogger.info(message);
     }
   },
   warn: (message, ...args) => {
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       pinoLogger.warn(message);
     } else {
       pinoLogger.warn(message);
     }
   },
   error: (message, ...args) => {
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       pinoLogger.error(message);
     } else {
       pinoLogger.error(message);
     }
   },
   debug: (message, ...args) => {
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       pinoLogger.debug(message);
     } else {
       pinoLogger.debug(message);

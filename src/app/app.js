@@ -11,7 +11,10 @@ import {
 } from '../middlewares/security.middleware.js';
 import { globalRateLimiter } from '../middlewares/rateLimiter.middleware.js';
 import { apiRoutes } from './routes.js';
-import { setCsrfCookie, csrfProtection } from '../middlewares/csrf.middleware.js';
+import {
+  setCsrfCookie,
+  csrfProtection,
+} from '../middlewares/csrf.middleware.js';
 import mongoose from 'mongoose';
 
 const app = express();

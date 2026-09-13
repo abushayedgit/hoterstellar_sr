@@ -1,4 +1,4 @@
-import { TableBooking } from "./tableBooking.model.js";
+import { TableBooking } from './tableBooking.model.js';
 
 export const tableBookingRepository = {
   findById: (bookingId) => TableBooking.findById(bookingId),
@@ -25,7 +25,7 @@ export const tableBookingRepository = {
 
     return Promise.all([
       TableBooking.find(filter)
-        .populate("userId", "name email phone")
+        .populate('userId', 'name email phone')
         .sort(sort)
         .skip(skip)
         .limit(limit),
@@ -42,8 +42,8 @@ export const tableBookingRepository = {
     bookingId,
     status,
     adminId = null,
-    note = "",
-    tableNumber = "",
+    note = '',
+    tableNumber = '',
   ) => {
     const updateData = {
       $set: { status },
@@ -70,7 +70,7 @@ export const tableBookingRepository = {
     const query = {
       date: new Date(date),
       time,
-      status: { $in: ["pending", "confirmed", "seated"] },
+      status: { $in: ['pending', 'confirmed', 'seated'] },
     };
 
     if (excludeId) {

@@ -7,13 +7,13 @@ import {
   userLogout,
   getUserProfile,
   updateUserProfile,
-} from "./user.auth.service.js";
+} from './user.auth.service.js';
 import {
   setRefreshTokenCookie,
   clearRefreshTokenCookie,
-} from "../../../utils/cookie.utils.js";
-import { env } from "../../../config/env.js";
-import { SECURITY } from "../../../constants/security.js";
+} from '../../../utils/cookie.utils.js';
+import { env } from '../../../config/env.js';
+import { SECURITY } from '../../../constants/security.js';
 
 export const signupController = async (req, res, next) => {
   try {
@@ -24,8 +24,8 @@ export const signupController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Verification code sent to your email",
+      code: 'OK',
+      message: 'Verification code sent to your email',
     });
   } catch (error) {
     next(error);
@@ -35,7 +35,7 @@ export const signupController = async (req, res, next) => {
 export const signupVerifyController = async (req, res, next) => {
   try {
     const { email, code } = req.body;
-    const deviceInfo = req.headers["user-agent"] || "Unknown device";
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
 
     const result = await userSignupVerify(email, code, deviceInfo);
 
@@ -49,8 +49,8 @@ export const signupVerifyController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Account created successfully",
+      code: 'CREATED',
+      message: 'Account created successfully',
       data: {
         accessToken: result.accessToken,
         user: result.user,
@@ -70,8 +70,8 @@ export const signinController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "If the email exists, a verification code has been sent",
+      code: 'OK',
+      message: 'If the email exists, a verification code has been sent',
     });
   } catch (error) {
     next(error);
@@ -81,7 +81,7 @@ export const signinController = async (req, res, next) => {
 export const signinVerifyController = async (req, res, next) => {
   try {
     const { email, code } = req.body;
-    const deviceInfo = req.headers["user-agent"] || "Unknown device";
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
 
     const result = await userSigninVerify(email, code, deviceInfo);
 
@@ -95,8 +95,8 @@ export const signinVerifyController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Login successful",
+      code: 'OK',
+      message: 'Login successful',
       data: {
         accessToken: result.accessToken,
         user: result.user,
@@ -111,14 +111,14 @@ export const refreshController = async (req, res, next) => {
   try {
     const refreshToken =
       req.cookies?.[env.USER_REFRESH_COOKIE_NAME] || req.body.refreshToken;
-    const deviceInfo = req.headers["user-agent"] || "Unknown device";
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
 
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
         statusCode: 401,
-        code: "AUTHENTICATION_ERROR",
-        message: "Refresh token required",
+        code: 'AUTHENTICATION_ERROR',
+        message: 'Refresh token required',
       });
     }
 
@@ -134,8 +134,8 @@ export const refreshController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Token refreshed",
+      code: 'OK',
+      message: 'Token refreshed',
       data: {
         accessToken: result.accessToken,
         user: result.user,
@@ -158,8 +158,8 @@ export const logoutController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Logout successful",
+      code: 'OK',
+      message: 'Logout successful',
     });
   } catch (error) {
     next(error);
@@ -175,8 +175,8 @@ export const getProfileController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Profile retrieved",
+      code: 'OK',
+      message: 'Profile retrieved',
       data: { user },
     });
   } catch (error) {
@@ -194,8 +194,8 @@ export const updateProfileController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Profile updated",
+      code: 'OK',
+      message: 'Profile updated',
       data: { user },
     });
   } catch (error) {

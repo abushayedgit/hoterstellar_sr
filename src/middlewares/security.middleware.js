@@ -9,7 +9,10 @@ export const securityHeadersMiddleware = (req, res, next) => {
 
   // Strict transport security (in production)
   if (env.NODE_ENV === 'production') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    res.setHeader(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload',
+    );
   }
 
   // Prevent clickjacking

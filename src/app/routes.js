@@ -1,47 +1,47 @@
-import { Router } from "express";
-import adminAuthRoutes from "../modules/auth/admin/admin.auth.routes.js";
-import userAuthRoutes from "../modules/auth/user/user.auth.routes.js";
-import adminRoutes from "../modules/admin/admin.routes.js";
-import userRoutes from "../modules/user/user.routes.js";
-import categoryRoutes from "../modules/category/category.routes.js";
-import foodRoutes from "../modules/food/food.routes.js";
-import cartRoutes from "../modules/cart/cart.routes.js";
-import orderRoutes from "../modules/order/order.routes.js";
-import tableBookingRoutes from "../modules/booking/table/tableBooking.routes.js";
-import eventBookingRoutes from "../modules/booking/event/eventBooking.routes.js";
-import reviewRoutes from "../modules/review/review.routes.js";
-import noticeRoutes from "../modules/notice/notice.routes.js";
-import billboardRoutes from "../modules/billboard/billboard.routes.js";
-import visitorRoutes from "../modules/visitor/visitor.routes.js";
-import analyticsRoutes from "../modules/analytics/analytics.routes.js";
-import contactRoutes from "../modules/contact/contact.routes.js";
+import { Router } from 'express';
+import adminAuthRoutes from '../modules/auth/admin/admin.auth.routes.js';
+import userAuthRoutes from '../modules/auth/user/user.auth.routes.js';
+import adminRoutes from '../modules/admin/admin.routes.js';
+import userRoutes from '../modules/user/user.routes.js';
+import categoryRoutes from '../modules/category/category.routes.js';
+import foodRoutes from '../modules/food/food.routes.js';
+import cartRoutes from '../modules/cart/cart.routes.js';
+import orderRoutes from '../modules/order/order.routes.js';
+import tableBookingRoutes from '../modules/booking/table/tableBooking.routes.js';
+import eventBookingRoutes from '../modules/booking/event/eventBooking.routes.js';
+import reviewRoutes from '../modules/review/review.routes.js';
+import noticeRoutes from '../modules/notice/notice.routes.js';
+import billboardRoutes from '../modules/billboard/billboard.routes.js';
+import visitorRoutes from '../modules/visitor/visitor.routes.js';
+import analyticsRoutes from '../modules/analytics/analytics.routes.js';
+import contactRoutes from '../modules/contact/contact.routes.js';
 
 export const apiRoutes = Router();
 
-apiRoutes.get("/ping", (req, res) => {
+apiRoutes.get('/ping', (req, res) => {
   return res.status(200).json({
     success: true,
     statusCode: 200,
-    code: "OK",
-    message: "Pong",
+    code: 'OK',
+    message: 'Pong',
     data: null,
   });
 });
 
-apiRoutes.use("/auth/admin", adminAuthRoutes);
-apiRoutes.use("/auth/user", userAuthRoutes);
-apiRoutes.use("/admin", adminRoutes);
-apiRoutes.use("/users", userRoutes);
-apiRoutes.use("/categories", categoryRoutes);
-apiRoutes.use("/foods", foodRoutes);
-apiRoutes.use("/cart", cartRoutes);
-apiRoutes.use("/orders", orderRoutes);
-apiRoutes.use("/bookings/table", tableBookingRoutes);
-apiRoutes.use("/bookings/event", eventBookingRoutes);
-apiRoutes.use("/reviews", reviewRoutes);
-apiRoutes.use("/notices", noticeRoutes);
-apiRoutes.use("/billboards", billboardRoutes);
-apiRoutes.use("/visitors", visitorRoutes);
-apiRoutes.use("/analytics", analyticsRoutes);
+apiRoutes.use('/auth/admin', adminAuthRoutes);
+apiRoutes.use('/auth/user', userAuthRoutes);
+apiRoutes.use('/admin', adminRoutes);
+apiRoutes.use('/users', userRoutes);
+apiRoutes.use('/categories', categoryRoutes);
+apiRoutes.use('/foods', foodRoutes);
+apiRoutes.use('/cart', cartRoutes);
+apiRoutes.use('/orders', orderRoutes);
+apiRoutes.use('/bookings/table', tableBookingRoutes);
+apiRoutes.use('/bookings/event', eventBookingRoutes);
+apiRoutes.use('/reviews', reviewRoutes);
+apiRoutes.use('/notices', noticeRoutes);
+apiRoutes.use('/billboards', billboardRoutes);
+apiRoutes.use('/visitors', visitorRoutes);
+apiRoutes.use('/analytics', analyticsRoutes);
 
-apiRoutes.use("/contact", contactRoutes);
+apiRoutes.use('/contact', contactRoutes);

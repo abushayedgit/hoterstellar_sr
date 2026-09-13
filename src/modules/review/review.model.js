@@ -1,37 +1,39 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const reviewSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      ref: 'User',
+      required: function () {
+        return !this.isManual;
+      },
       index: true,
     },
     type: {
       type: String,
-      enum: ["food", "table", "event"],
+      enum: ['food', 'table', 'event'],
       required: true,
     },
     food: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Food",
+      ref: 'Food',
       default: null,
     },
     tableBooking: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TableBooking",
+      ref: 'TableBooking',
       default: null,
     },
     eventBooking: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "EventBooking",
+      ref: 'EventBooking',
       default: null,
     },
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
+      ref: 'Order',
       default: null,
     },
     rating: {
@@ -54,8 +56,8 @@ const reviewSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["food", "service", "ambiance", "overall", "event"],
-      default: "overall",
+      enum: ['food', 'service', 'ambiance', 'overall', 'event'],
+      default: 'overall',
     },
     isApproved: {
       type: Boolean,
@@ -67,14 +69,24 @@ const reviewSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    isManual: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    createdByAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Admin',
+      default: null,
+    },
     adminResponse: {
       response: {
         type: String,
-        default: "",
+        default: '',
       },
       respondedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Admin",
+        ref: 'Admin',
         default: null,
       },
       respondedAt: {
@@ -91,7 +103,7 @@ reviewSchema.index(
   { userId: 1, food: 1 },
   {
     unique: true,
-    partialFilterExpression: { type: "food", food: { $ne: null } },
+    partialFilterExpression: { type: 'food', food: { $ne: null } },
   },
 );
 
@@ -100,7 +112,7 @@ reviewSchema.index(
   { userId: 1, tableBooking: 1 },
   {
     unique: true,
-    partialFilterExpression: { type: "table", tableBooking: { $ne: null } },
+    partialFilterExpression: { type: 'table', tableBooking: { $ne: null } },
   },
 );
 
@@ -109,7 +121,7 @@ reviewSchema.index(
   { userId: 1, eventBooking: 1 },
   {
     unique: true,
-    partialFilterExpression: { type: "event", eventBooking: { $ne: null } },
+    partialFilterExpression: { type: 'event', eventBooking: { $ne: null } },
   },
 );
 
@@ -119,4 +131,4 @@ reviewSchema.index({ tableBooking: 1, isApproved: 1 });
 reviewSchema.index({ eventBooking: 1, isApproved: 1 });
 reviewSchema.index({ userId: 1, createdAt: -1 });
 
-export const Review = mongoose.model("Review", reviewSchema);
+export const Review = mongoose.model('Review', reviewSchema);

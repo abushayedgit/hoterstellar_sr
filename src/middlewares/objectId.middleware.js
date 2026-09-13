@@ -1,12 +1,12 @@
-import mongoose from "mongoose";
-import { BadRequestError } from "../errors/BadRequestError.js";
+import mongoose from 'mongoose';
+import { BadRequestError } from '../errors/BadRequestError.js';
 
 /**
  * Validates that a route parameter is a valid MongoDB ObjectId
  * @param {string} paramName - Name of the route parameter
  * @returns {Function} Express middleware
  */
-export const validateObjectIdParam = (paramName = "id") => {
+export const validateObjectIdParam = (paramName = 'id') => {
   return (req, res, next) => {
     const id = req.params[paramName];
     if (!mongoose.Types.ObjectId.isValid(id)) {

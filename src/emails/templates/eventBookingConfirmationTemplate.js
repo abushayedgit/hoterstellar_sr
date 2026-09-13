@@ -1,13 +1,13 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const eventBookingConfirmationTemplate = ({
   bookingNumber,
   customerName,
   eventDate,
   eventType,
-  eventDetails = "",
+  eventDetails = '',
   guestCount,
-  specialRequirements = "",
+  specialRequirements = '',
 }) => {
   const content = `
     <p class="content-text">Dear ${customerName},</p>
@@ -41,7 +41,7 @@ export const eventBookingConfirmationTemplate = ({
         <span class="info-value">${eventDetails}</span>
       </div>
       `
-          : ""
+          : ''
       }
       ${
         specialRequirements
@@ -51,7 +51,7 @@ export const eventBookingConfirmationTemplate = ({
         <span class="info-value">${specialRequirements}</span>
       </div>
       `
-          : ""
+          : ''
       }
     </div>
     
@@ -61,7 +61,7 @@ export const eventBookingConfirmationTemplate = ({
   `;
 
   return baseLayout({
-    title: "Event Booking Confirmed",
+    title: 'Event Booking Confirmed',
     preheader: `Your event booking ${bookingNumber} is confirmed`,
     content,
   });

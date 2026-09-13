@@ -1,6 +1,6 @@
 export const baseSchemaOptions = {
   timestamps: true,
-  versionKey: "__v",
+  versionKey: '__v',
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
@@ -27,7 +27,7 @@ export const paginatePlugin = (schema) => {
       page = 1,
       limit = 10,
       sort = { createdAt: -1 },
-      select = "",
+      select = '',
     } = options;
 
     const skip = (page - 1) * limit;

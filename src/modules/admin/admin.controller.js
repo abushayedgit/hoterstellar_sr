@@ -5,7 +5,27 @@ import {
   deactivateAdmin,
   activateAdmin,
   deleteAdmin,
-} from "./admin.service.js";
+} from './admin.service.js';
+
+export const getMeController = async (req, res, next) => {
+  try {
+    const admin = req.auth.user;
+    const { ROLE_PERMISSIONS } = await import('../../constants/permissions.js');
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      code: 'OK',
+      message: 'Current admin',
+      data: {
+        admin: admin.toSafeObject(),
+        permissions: ROLE_PERMISSIONS[admin.role] || [],
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAdminController = async (req, res, next) => {
   try {
@@ -15,8 +35,8 @@ export const getAdminController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admin retrieved",
+      code: 'OK',
+      message: 'Admin retrieved',
       data: { admin },
     });
   } catch (error) {
@@ -31,8 +51,8 @@ export const listAdminsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admins retrieved",
+      code: 'OK',
+      message: 'Admins retrieved',
       data: result,
     });
   } catch (error) {
@@ -52,8 +72,8 @@ export const updateAdminController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admin updated",
+      code: 'OK',
+      message: 'Admin updated',
       data: { admin },
     });
   } catch (error) {
@@ -71,8 +91,8 @@ export const deactivateAdminController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admin deactivated",
+      code: 'OK',
+      message: 'Admin deactivated',
       data: { admin },
     });
   } catch (error) {
@@ -90,8 +110,8 @@ export const activateAdminController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admin activated",
+      code: 'OK',
+      message: 'Admin activated',
       data: { admin },
     });
   } catch (error) {
@@ -109,8 +129,8 @@ export const deleteAdminController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Admin deleted",
+      code: 'OK',
+      message: 'Admin deleted',
     });
   } catch (error) {
     next(error);

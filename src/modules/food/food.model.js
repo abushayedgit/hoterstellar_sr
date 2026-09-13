@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const foodSchema = new mongoose.Schema(
   {
@@ -24,7 +24,7 @@ const foodSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: 'Category',
       required: true,
       index: true,
     },
@@ -91,21 +91,21 @@ const foodSchema = new mongoose.Schema(
 
 foodSchema.index({ category: 1, isAvailable: 1 });
 foodSchema.index({
-  name: "text",
-  description: "text",
-  ingredients: "text",
-  tags: "text",
+  name: 'text',
+  description: 'text',
+  ingredients: 'text',
+  tags: 'text',
 });
 
-foodSchema.pre("save", function (next) {
-  if (this.isModified("name") && !this.slug) {
+foodSchema.pre('save', function (next) {
+  if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_-]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
   next();
 });
 
-export const Food = mongoose.model("Food", foodSchema);
+export const Food = mongoose.model('Food', foodSchema);

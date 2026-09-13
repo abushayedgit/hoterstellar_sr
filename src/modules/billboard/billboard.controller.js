@@ -7,7 +7,7 @@ import {
   removeCarouselItem,
   reorderCarousels,
   updatePopupImage,
-} from "./billboard.service.js";
+} from './billboard.service.js';
 
 export const getBillboardController = async (req, res, next) => {
   try {
@@ -16,8 +16,8 @@ export const getBillboardController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Billboard retrieved",
+      code: 'OK',
+      message: 'Billboard retrieved',
       data: { billboard },
     });
   } catch (error) {
@@ -32,8 +32,8 @@ export const getPublicBillboardController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Billboard retrieved",
+      code: 'OK',
+      message: 'Billboard retrieved',
       data: billboard,
     });
   } catch (error) {
@@ -51,8 +51,8 @@ export const updateBillboardController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Billboard updated",
+      code: 'OK',
+      message: 'Billboard updated',
       data: { billboard },
     });
   } catch (error) {
@@ -71,8 +71,8 @@ export const addCarouselItemController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Carousel item added",
+      code: 'CREATED',
+      message: 'Carousel item added',
       data: { billboard },
     });
   } catch (error) {
@@ -97,8 +97,8 @@ export const updateCarouselItemController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Carousel item updated",
+      code: 'OK',
+      message: 'Carousel item updated',
       data: { billboard },
     });
   } catch (error) {
@@ -116,8 +116,8 @@ export const removeCarouselItemController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Carousel item removed",
+      code: 'OK',
+      message: 'Carousel item removed',
       data: { billboard },
     });
   } catch (error) {
@@ -135,8 +135,8 @@ export const reorderCarouselsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Carousels reordered",
+      code: 'OK',
+      message: 'Carousels reordered',
       data: { billboard },
     });
   } catch (error) {
@@ -159,8 +159,8 @@ export const updatePopupImageController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Popup image updated",
+      code: 'OK',
+      message: 'Popup image updated',
       data: { billboard },
     });
   } catch (error) {

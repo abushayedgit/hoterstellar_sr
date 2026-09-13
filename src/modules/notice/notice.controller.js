@@ -8,7 +8,7 @@ import {
   deleteNotice,
   publishNotice,
   archiveNotice,
-} from "./notice.service.js";
+} from './notice.service.js';
 
 export const createNoticeController = async (req, res, next) => {
   try {
@@ -21,8 +21,8 @@ export const createNoticeController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Notice created",
+      code: 'CREATED',
+      message: 'Notice created',
       data: { notice },
     });
   } catch (error) {
@@ -37,8 +37,8 @@ export const listNoticesController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notices retrieved",
+      code: 'OK',
+      message: 'Notices retrieved',
       data: result,
     });
   } catch (error) {
@@ -53,8 +53,8 @@ export const listPublishedNoticesController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notices retrieved",
+      code: 'OK',
+      message: 'Notices retrieved',
       data: result,
     });
   } catch (error) {
@@ -71,8 +71,8 @@ export const getNoticeController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice retrieved",
+      code: 'OK',
+      message: 'Notice retrieved',
       data: { notice },
     });
   } catch (error) {
@@ -89,8 +89,8 @@ export const getNoticeBySlugController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice retrieved",
+      code: 'OK',
+      message: 'Notice retrieved',
       data: { notice },
     });
   } catch (error) {
@@ -109,8 +109,8 @@ export const updateNoticeController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice updated",
+      code: 'OK',
+      message: 'Notice updated',
       data: { notice },
     });
   } catch (error) {
@@ -127,8 +127,8 @@ export const deleteNoticeController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice deleted",
+      code: 'OK',
+      message: 'Notice deleted',
     });
   } catch (error) {
     next(error);
@@ -144,8 +144,8 @@ export const publishNoticeController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice published",
+      code: 'OK',
+      message: 'Notice published',
       data: { notice },
     });
   } catch (error) {
@@ -162,8 +162,8 @@ export const archiveNoticeController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Notice archived",
+      code: 'OK',
+      message: 'Notice archived',
       data: { notice },
     });
   } catch (error) {

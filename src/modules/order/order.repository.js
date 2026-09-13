@@ -1,4 +1,4 @@
-import { Order } from "./order.model.js";
+import { Order } from './order.model.js';
 
 export const orderRepository = {
   findById: (orderId) => Order.findById(orderId),
@@ -21,7 +21,7 @@ export const orderRepository = {
 
     return Promise.all([
       Order.find(filter)
-        .populate("userId", "name email phone")
+        .populate('userId', 'name email phone')
         .sort(sort)
         .skip(skip)
         .limit(limit),
@@ -34,7 +34,7 @@ export const orderRepository = {
   updateById: (orderId, updateData) =>
     Order.findByIdAndUpdate(orderId, updateData, { new: true }),
 
-  updateStatus: (orderId, status, adminId, note = "") => {
+  updateStatus: (orderId, status, adminId, note = '') => {
     return Order.findByIdAndUpdate(
       orderId,
       {

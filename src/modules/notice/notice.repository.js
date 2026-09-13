@@ -6,19 +6,12 @@ export const noticeRepository = {
   findBySlug: (slug) => Notice.findOne({ slug }),
 
   findAll: (filter = {}, options = {}) => {
-    const {
-      page = 1,
-      limit = 10,
-      sort = { publishedAt: -1 },
-    } = options;
+    const { page = 1, limit = 10, sort = { publishedAt: -1 } } = options;
 
     const skip = (page - 1) * limit;
 
     return Promise.all([
-      Notice.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit),
+      Notice.find(filter).sort(sort).skip(skip).limit(limit),
       Notice.countDocuments(filter),
     ]);
   },
@@ -26,12 +19,7 @@ export const noticeRepository = {
   create: (data) => Notice.create(data),
 
   updateById: (noticeId, updateData) =>
-    Notice.findByIdAndUpdate(
-      noticeId,
-      updateData,
-      { new: true }
-    ),
+    Notice.findByIdAndUpdate(noticeId, updateData, { new: true }),
 
-  deleteById: (noticeId) =>
-    Notice.findByIdAndDelete(noticeId),
+  deleteById: (noticeId) => Notice.findByIdAndDelete(noticeId),
 };

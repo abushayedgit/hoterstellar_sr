@@ -4,22 +4,22 @@ import {
   getContactById,
   updateContactStatus,
   deleteContact,
-} from "./contact.service.js";
+} from './contact.service.js';
 
 export const createContactController = async (req, res, next) => {
   try {
     const contactData = req.body;
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip;
-    const userAgent = req.headers["user-agent"];
-    const referrer = req.headers["referer"] || req.headers["referrer"] || "";
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+    const userAgent = req.headers['user-agent'];
+    const referrer = req.headers['referer'] || req.headers['referrer'] || '';
 
     const contact = await createContact(contactData, ip, userAgent, referrer);
 
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Contact form submitted",
+      code: 'CREATED',
+      message: 'Contact form submitted',
       data: { contact },
     });
   } catch (error) {
@@ -34,8 +34,8 @@ export const listContactsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Contacts retrieved",
+      code: 'OK',
+      message: 'Contacts retrieved',
       data: result,
     });
   } catch (error) {
@@ -52,8 +52,8 @@ export const getContactController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Contact retrieved",
+      code: 'OK',
+      message: 'Contact retrieved',
       data: { contact },
     });
   } catch (error) {
@@ -71,8 +71,8 @@ export const updateContactStatusController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Contact status updated",
+      code: 'OK',
+      message: 'Contact status updated',
       data: { contact },
     });
   } catch (error) {
@@ -89,8 +89,8 @@ export const deleteContactController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Contact deleted",
+      code: 'OK',
+      message: 'Contact deleted',
     });
   } catch (error) {
     next(error);

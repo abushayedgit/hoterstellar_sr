@@ -1,20 +1,20 @@
-import { AuthenticationError } from "../errors/AuthenticationError.js";
+import { AuthenticationError } from '../errors/AuthenticationError.js';
 
 export const verifyAccessToken = (token, secret) => {
   try {
-    const jwt = require("jsonwebtoken");
+    const jwt = require('jsonwebtoken');
     return jwt.verify(token, secret);
   } catch (error) {
-    throw new AuthenticationError("Invalid or expired access token");
+    throw new AuthenticationError('Invalid or expired access token');
   }
 };
 
 export const extractBearerToken = (req) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new AuthenticationError("Access token required");
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new AuthenticationError('Access token required');
   }
-  return authHeader.split(" ")[1];
+  return authHeader.split(' ')[1];
 };
 
 export const createAuthMiddleware = (secret, getUserById) => {
@@ -28,11 +28,11 @@ export const createAuthMiddleware = (secret, getUserById) => {
       );
 
       if (!user) {
-        throw new AuthenticationError("Account not found");
+        throw new AuthenticationError('Account not found');
       }
 
       if (user.isActive === false) {
-        throw new AuthenticationError("Account is deactivated");
+        throw new AuthenticationError('Account is deactivated');
       }
 
       req.auth = {

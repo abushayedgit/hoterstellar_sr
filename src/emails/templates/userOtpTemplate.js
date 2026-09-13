@@ -1,14 +1,14 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const userOtpTemplate = ({ name, otp, purpose, expiryMinutes = 5 }) => {
-  const isSignup = purpose === "signup";
-  const title = isSignup ? "Verify Your Email" : "Sign In Verification";
+  const isSignup = purpose === 'signup';
+  const title = isSignup ? 'Verify Your Email' : 'Sign In Verification';
   const message = isSignup
-    ? "Thank you for choosing Hoterstellar. Use the code below to verify your email and complete your registration:"
-    : "Use the code below to securely sign in to your Hoterstellar account:";
+    ? 'Thank you for choosing Hoterstellar. Use the code below to verify your email and complete your registration:'
+    : 'Use the code below to securely sign in to your Hoterstellar account:';
 
   const content = `
-    <p class="content-text">Dear ${name || "Guest"},</p>
+    <p class="content-text">Dear ${name || 'Guest'},</p>
     <p class="content-text">${message}</p>
     
     <div class="otp-box">
@@ -24,7 +24,7 @@ export const userOtpTemplate = ({ name, otp, purpose, expiryMinutes = 5 }) => {
       </div>
       <div class="info-row">
         <span class="info-label">Purpose</span>
-        <span class="info-value">${isSignup ? "Account Registration" : "Secure Sign In"}</span>
+        <span class="info-value">${isSignup ? 'Account Registration' : 'Secure Sign In'}</span>
       </div>
     </div>
     

@@ -22,9 +22,13 @@ const printBanner = () => {
   console.log('');
   console.log(chalk.hex('#6366f1')('═'.repeat(65)));
   console.log('');
-  console.log(chalk.hex('#8b5cf6').bold('   Hoterstellar — Backend API Server'));
+  console.log(
+    chalk.hex('#8b5cf6').bold('   Hoterstellar — Backend API Server'),
+  );
   console.log('');
-  console.log(chalk.hex('#a78bfa')('   Hotel & Restaurant Management Platform'));
+  console.log(
+    chalk.hex('#a78bfa')('   Hotel & Restaurant Management Platform'),
+  );
   console.log('');
   console.log(chalk.hex('#6366f1')('═'.repeat(65)));
   console.log('');
@@ -40,8 +44,15 @@ const printStartupHeader = () => {
   printDivider();
 };
 
-const printKeyValue = (key, value, keyColor = '#94a3b8', valueColor = '#e2e8f0') => {
-  console.log(`  ${chalk.hex(keyColor)(key.padEnd(20))} ${chalk.hex(valueColor)(value)}`);
+const printKeyValue = (
+  key,
+  value,
+  keyColor = '#94a3b8',
+  valueColor = '#e2e8f0',
+) => {
+  console.log(
+    `  ${chalk.hex(keyColor)(key.padEnd(20))} ${chalk.hex(valueColor)(value)}`,
+  );
 };
 
 const printStep = (step, total, label, status, details) => {
@@ -55,7 +66,9 @@ const printStep = (step, total, label, status, details) => {
           : chalk.cyan(' ⓘ');
 
   const stepLabel = `[${String(step).padStart(2, '0')}/${total}]`;
-  console.log(`  ${chalk.hex('#6366f1')(stepLabel)}${icon}  ${chalk.hex('#e2e8f0')(label)}`);
+  console.log(
+    `  ${chalk.hex('#6366f1')(stepLabel)}${icon}  ${chalk.hex('#e2e8f0')(label)}`,
+  );
   if (details) {
     console.log(`       ${chalk.hex('#64748b')(details)}`);
   }
@@ -67,7 +80,12 @@ const getServicesHealth = () => {
   const mongoState = mongoose.connection.readyState;
   services.push({
     name: 'MongoDB',
-    status: mongoState === 1 ? 'healthy' : mongoState === 2 ? 'degraded' : 'unhealthy',
+    status:
+      mongoState === 1
+        ? 'healthy'
+        : mongoState === 2
+          ? 'degraded'
+          : 'unhealthy',
     details:
       mongoState === 0
         ? 'Disconnected'
@@ -81,13 +99,17 @@ const getServicesHealth = () => {
   services.push({
     name: 'Redis',
     status: isRedisReady() ? 'healthy' : 'degraded',
-    details: isRedisReady() ? 'Connected & ready' : 'Not available — cache disabled',
+    details: isRedisReady()
+      ? 'Connected & ready'
+      : 'Not available — cache disabled',
   });
 
   services.push({
     name: 'Brevo Email',
     status: isBrevoConfigured() ? 'healthy' : 'degraded',
-    details: isBrevoConfigured() ? 'Configured & verified' : 'Not configured — email disabled',
+    details: isBrevoConfigured()
+      ? 'Configured & verified'
+      : 'Not configured — email disabled',
   });
 
   services.push({
@@ -115,7 +137,9 @@ const setupGracefulShutdown = (server) => {
     console.log('');
     printDivider();
     console.log('');
-    logger.info(chalk.yellow.bold(`  ${signal} received — Starting graceful shutdown...`));
+    logger.info(
+      chalk.yellow.bold(`  ${signal} received — Starting graceful shutdown...`),
+    );
     console.log('');
 
     server.close(() => {
@@ -155,7 +179,9 @@ const setupGracefulShutdown = (server) => {
         clearTimeout(forceExit);
 
         console.log('');
-        logger.info(chalk.green.bold('  ✓ Graceful shutdown complete. Goodbye! 👋'));
+        logger.info(
+          chalk.green.bold('  ✓ Graceful shutdown complete. Goodbye! 👋'),
+        );
         console.log('');
         printDivider();
         console.log('');
@@ -177,7 +203,10 @@ const setupGracefulShutdown = (server) => {
 
   process.on('unhandledRejection', (reason, promise) => {
     logger.error('Unhandled Rejection at:', promise);
-    logger.error('Reason:', reason instanceof Error ? reason.message : String(reason));
+    logger.error(
+      'Reason:',
+      reason instanceof Error ? reason.message : String(reason),
+    );
   });
 
   process.on('uncaughtException', (error) => {
@@ -197,7 +226,9 @@ const startServer = async () => {
   // Step 1: Validate Environment
   currentStep++;
   printStep(currentStep, totalSteps, 'Validating environment', 'pass');
-  logger.info(`    Node ${process.version} | ${process.platform} ${process.arch}`);
+  logger.info(
+    `    Node ${process.version} | ${process.platform} ${process.arch}`,
+  );
   logger.info(`    Public URL: ${env.CLIENT_PUBLIC_URL}`);
   logger.info(`    Dashboard URL: ${env.CLIENT_DASHBOARD_URL}`);
   printDivider();
@@ -213,7 +244,9 @@ const startServer = async () => {
     logger.info(`    Database: ${dbName} @ ${host}`);
   } catch (error) {
     printStep(currentStep, totalSteps, 'MongoDB connection failed', 'fail');
-    logger.error(`    ${error instanceof Error ? error.message : 'Unknown error'}`);
+    logger.error(
+      `    ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
     console.log('');
     logger.error('  ✗ Cannot start without MongoDB. Exiting.');
     process.exit(1);
@@ -253,7 +286,9 @@ const startServer = async () => {
     await connectRedis();
     if (isRedisReady()) {
       printStep(currentStep, totalSteps, 'Redis connected', 'pass');
-      logger.info(`    URL: ${env.UPSTASH_REDIS_REST_URL.replace(/\/\/.*@/, '//***@')}`);
+      logger.info(
+        `    URL: ${env.UPSTASH_REDIS_REST_URL.replace(/\/\/.*@/, '//***@')}`,
+      );
 
       // Initialize queues (await each one)
       const emailQueue = await getQueue(QUEUE_NAMES.EMAIL);
@@ -264,10 +299,22 @@ const startServer = async () => {
       if (analyticsQueue) console.log(chalk.gray('    Analytics queue ready'));
       if (mediaQueue) console.log(chalk.gray('    Media cleanup queue ready'));
     } else {
-      printStep(currentStep, totalSteps, 'Redis unavailable', 'warn', 'Continuing without cache');
+      printStep(
+        currentStep,
+        totalSteps,
+        'Redis unavailable',
+        'warn',
+        'Continuing without cache',
+      );
     }
   } catch {
-    printStep(currentStep, totalSteps, 'Redis unavailable', 'warn', 'Continuing without cache');
+    printStep(
+      currentStep,
+      totalSteps,
+      'Redis unavailable',
+      'warn',
+      'Continuing without cache',
+    );
   }
   printDivider();
 
@@ -285,11 +332,18 @@ const startServer = async () => {
   printStep(currentStep, totalSteps, 'Starting HTTP server...', 'info');
 
   server.listen(env.PORT, () => {
-    printStep(currentStep, totalSteps, `Server listening on port ${env.PORT}`, 'pass');
+    printStep(
+      currentStep,
+      totalSteps,
+      `Server listening on port ${env.PORT}`,
+      'pass',
+    );
 
     console.log('');
     console.log(
-      chalk.hex('#10b981').bold('  ╭────────────────────────────────────────────────────╮'),
+      chalk
+        .hex('#10b981')
+        .bold('  ╭────────────────────────────────────────────────────╮'),
     );
     console.log(
       chalk.hex('#10b981').bold('  │') +
@@ -298,13 +352,25 @@ const startServer = async () => {
         chalk.hex('#10b981').bold('│'),
     );
     console.log(
-      chalk.hex('#10b981').bold('  ╰────────────────────────────────────────────────────╯'),
+      chalk
+        .hex('#10b981')
+        .bold('  ╰────────────────────────────────────────────────────╯'),
     );
     console.log('');
-    printKeyValue('Environment', env.NODE_ENV.toUpperCase(), '#94a3b8', '#10b981');
+    printKeyValue(
+      'Environment',
+      env.NODE_ENV.toUpperCase(),
+      '#94a3b8',
+      '#10b981',
+    );
     printKeyValue('Port', env.PORT.toString(), '#94a3b8', '#e2e8f0');
     printKeyValue('Public URL', env.CLIENT_PUBLIC_URL, '#94a3b8', '#6366f1');
-    printKeyValue('Dashboard URL', env.CLIENT_DASHBOARD_URL, '#94a3b8', '#8b5cf6');
+    printKeyValue(
+      'Dashboard URL',
+      env.CLIENT_DASHBOARD_URL,
+      '#94a3b8',
+      '#8b5cf6',
+    );
     printKeyValue('WebSocket', 'Enabled (same port)', '#94a3b8', '#e2e8f0');
     printKeyValue('API Version', '/api/v1', '#94a3b8', '#e2e8f0');
     console.log('');
@@ -327,7 +393,9 @@ const startServer = async () => {
     console.log(chalk.hex('#6366f1')('═'.repeat(65)));
     console.log('');
     console.log(
-      chalk.hex('#64748b')(`  Press ${chalk.hex('#e2e8f0')('CTRL+C')} to stop the server`),
+      chalk.hex('#64748b')(
+        `  Press ${chalk.hex('#e2e8f0')('CTRL+C')} to stop the server`,
+      ),
     );
     console.log('');
   });
@@ -337,14 +405,22 @@ const startServer = async () => {
 
 startServer().catch((error) => {
   console.log('');
-  console.log(chalk.red.bold('╔══════════════════════════════════════════════════════════╗'));
+  console.log(
+    chalk.red.bold(
+      '╔══════════════════════════════════════════════════════════╗',
+    ),
+  );
   console.log(
     chalk.red.bold('║') +
       chalk.white.bold('  ✗ FATAL: Server failed to start') +
       '                        ' +
       chalk.red.bold('║'),
   );
-  console.log(chalk.red.bold('╚══════════════════════════════════════════════════════════╝'));
+  console.log(
+    chalk.red.bold(
+      '╚══════════════════════════════════════════════════════════╝',
+    ),
+  );
   console.log('');
   logger.error(error instanceof Error ? error.message : 'Unknown error');
   if (error instanceof Error && error.stack) {

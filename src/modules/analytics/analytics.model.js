@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const analyticsDeletionConfirmationSchema = new mongoose.Schema(
   {
     adminId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: 'Admin',
       required: true,
     },
     codeHash: {
@@ -36,6 +36,6 @@ const analyticsDeletionConfirmationSchema = new mongoose.Schema(
 );
 
 export const AnalyticsDeletionConfirmation = mongoose.model(
-  "AnalyticsDeletionConfirmation",
+  'AnalyticsDeletionConfirmation',
   analyticsDeletionConfirmationSchema,
 );

@@ -1,4 +1,4 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const adminNewOrderNotificationTemplate = ({
   orderNumber,
@@ -45,7 +45,7 @@ export const adminNewOrderNotificationTemplate = ({
   `;
 
   return baseLayout({
-    title: "New Order Received",
+    title: 'New Order Received',
     preheader: `New order ${orderNumber} received`,
     content,
   });

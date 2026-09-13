@@ -1,16 +1,16 @@
-import { Review } from "./review.model.js";
-import { Food } from "../food/food.model.js";
-import { Order } from "../order/order.model.js";
-import { TableBooking } from "../booking/table/tableBooking.model.js";
-import { EventBooking } from "../booking/event/eventBooking.model.js";
-import { reviewRepository } from "./review.repository.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { ConflictError } from "../../errors/ConflictError.js";
-import { logger } from "../../utils/logger.js";
+import { Review } from './review.model.js';
+import { Food } from '../food/food.model.js';
+import { Order } from '../order/order.model.js';
+import { TableBooking } from '../booking/table/tableBooking.model.js';
+import { EventBooking } from '../booking/event/eventBooking.model.js';
+import { reviewRepository } from './review.repository.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { ConflictError } from '../../errors/ConflictError.js';
+import { logger } from '../../utils/logger.js';
 
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { emitAdminEvent } from '../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../constants/socketEvents.js';
 
 const updateFoodRating = async (foodId) => {
   const result = await reviewRepository.getAverageRatingForFood(foodId);
@@ -31,15 +31,15 @@ export const createFoodReview = async (userId, reviewData) => {
   // Verify order exists and belongs to user
   const order = await Order.findById(orderId);
   if (!order) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
   if (order.userId.toString() !== userId.toString()) {
-    throw new BadRequestError("You can only review your own orders");
+    throw new BadRequestError('You can only review your own orders');
   }
 
-  if (order.status !== "completed") {
-    throw new BadRequestError("You can only review completed orders");
+  if (order.status !== 'completed') {
+    throw new BadRequestError('You can only review completed orders');
   }
 
   // Verify food is in order
@@ -47,7 +47,7 @@ export const createFoodReview = async (userId, reviewData) => {
     (item) => item.food.toString() === foodId,
   );
   if (!foodInOrder) {
-    throw new BadRequestError("This food is not in your order");
+    throw new BadRequestError('This food is not in your order');
   }
 
   // Check if already reviewed this food
@@ -56,12 +56,12 @@ export const createFoodReview = async (userId, reviewData) => {
     foodId,
   );
   if (existingReview) {
-    throw new ConflictError("You have already reviewed this food");
+    throw new ConflictError('You have already reviewed this food');
   }
 
   const review = await reviewRepository.create({
     userId,
-    type: "food",
+    type: 'food',
     food: foodId,
     orderId,
     rating,
@@ -73,11 +73,11 @@ export const createFoodReview = async (userId, reviewData) => {
 
   await updateFoodRating(foodId);
 
-  logger.info("Food review created", { reviewId: review._id, userId, foodId });
+  logger.info('Food review created', { reviewId: review._id, userId, foodId });
 
   emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
     reviewId: review._id,
-    type: "food",
+    type: 'food',
     foodId,
     rating,
   });
@@ -92,15 +92,15 @@ export const createTableReview = async (userId, reviewData) => {
   if (tableBookingId) {
     const booking = await TableBooking.findById(tableBookingId);
     if (!booking) {
-      throw new NotFoundError("Table booking not found");
+      throw new NotFoundError('Table booking not found');
     }
 
     if (booking.userId && booking.userId.toString() !== userId.toString()) {
-      throw new BadRequestError("You can only review your own bookings");
+      throw new BadRequestError('You can only review your own bookings');
     }
 
-    if (booking.status !== "completed") {
-      throw new BadRequestError("You can only review completed bookings");
+    if (booking.status !== 'completed') {
+      throw new BadRequestError('You can only review completed bookings');
     }
 
     // Check if already reviewed this specific booking (unique index will also enforce)
@@ -109,13 +109,13 @@ export const createTableReview = async (userId, reviewData) => {
       tableBookingId,
     );
     if (existingReview) {
-      throw new ConflictError("You have already reviewed this booking");
+      throw new ConflictError('You have already reviewed this booking');
     }
   }
 
   const review = await reviewRepository.create({
     userId,
-    type: "table",
+    type: 'table',
     tableBooking: tableBookingId || null, // set null if not provided
     rating,
     title,
@@ -124,7 +124,7 @@ export const createTableReview = async (userId, reviewData) => {
     isApproved: true,
   });
 
-  logger.info("Table review created", {
+  logger.info('Table review created', {
     reviewId: review._id,
     userId,
     tableBookingId: tableBookingId || null,
@@ -132,7 +132,7 @@ export const createTableReview = async (userId, reviewData) => {
 
   emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
     reviewId: review._id,
-    type: "table",
+    type: 'table',
     tableBookingId: tableBookingId || null,
     rating,
   });
@@ -147,15 +147,15 @@ export const createEventReview = async (userId, reviewData) => {
   if (eventBookingId) {
     const booking = await EventBooking.findById(eventBookingId);
     if (!booking) {
-      throw new NotFoundError("Event booking not found");
+      throw new NotFoundError('Event booking not found');
     }
 
     if (booking.userId && booking.userId.toString() !== userId.toString()) {
-      throw new BadRequestError("You can only review your own bookings");
+      throw new BadRequestError('You can only review your own bookings');
     }
 
-    if (booking.status !== "completed") {
-      throw new BadRequestError("You can only review completed bookings");
+    if (booking.status !== 'completed') {
+      throw new BadRequestError('You can only review completed bookings');
     }
 
     // Check if already reviewed this specific booking
@@ -164,13 +164,13 @@ export const createEventReview = async (userId, reviewData) => {
       eventBookingId,
     );
     if (existingReview) {
-      throw new ConflictError("You have already reviewed this booking");
+      throw new ConflictError('You have already reviewed this booking');
     }
   }
 
   const review = await reviewRepository.create({
     userId,
-    type: "event",
+    type: 'event',
     eventBooking: eventBookingId || null,
     rating,
     title,
@@ -179,17 +179,77 @@ export const createEventReview = async (userId, reviewData) => {
     isApproved: true,
   });
 
-  logger.info("Event review created", {
+  logger.info('Event review created', {
     reviewId: review._id,
     userId,
     eventBookingId: eventBookingId || null,
   });
   emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
     reviewId: review._id,
-    type: "event",
+    type: 'event',
     eventBookingId: eventBookingId || null,
     rating,
   });
+  return review;
+};
+
+/**
+ * Manual review creation — SUPER ADMIN ONLY.
+ * Creates an admin-authored review not tied to a user order/booking.
+ */
+export const createManualReview = async (reviewData, adminId) => {
+  const {
+    type,
+    foodId,
+    tableBookingId,
+    eventBookingId,
+    rating,
+    title,
+    comment,
+    category,
+  } = reviewData;
+
+  const payload = {
+    userId: null,
+    isManual: true,
+    createdByAdminId: adminId,
+    type,
+    rating,
+    title,
+    comment,
+    category,
+    isApproved: true,
+  };
+
+  if (type === 'food') {
+    const food = await Food.findById(foodId);
+    if (!food) throw new NotFoundError('Food not found');
+    payload.food = foodId;
+  } else if (type === 'table') {
+    payload.tableBooking = tableBookingId || null;
+  } else if (type === 'event') {
+    payload.eventBooking = eventBookingId || null;
+  }
+
+  const review = await reviewRepository.create(payload);
+
+  if (type === 'food' && foodId) {
+    await updateFoodRating(foodId);
+  }
+
+  logger.info('Manual review created by admin', {
+    reviewId: review._id,
+    adminId,
+    type,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.REVIEW_NEW, {
+    reviewId: review._id,
+    type,
+    rating,
+    isManual: true,
+  });
+
   return review;
 };
 
@@ -201,9 +261,9 @@ export const getUserReviews = async (userId, query) => {
 
   const [reviews, total] = await Promise.all([
     Review.find(filter)
-      .populate("food", "name images")
-      .populate("tableBooking", "bookingNumber")
-      .populate("eventBooking", "bookingNumber")
+      .populate('food', 'name images')
+      .populate('tableBooking', 'bookingNumber')
+      .populate('eventBooking', 'bookingNumber')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
@@ -233,21 +293,21 @@ export const listReviews = async (query) => {
     isApproved,
     rating,
     foodId,
-    sortBy = "createdAt",
-    sortOrder = "desc",
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
   } = query;
 
   const filter = {};
 
   if (type) filter.type = type;
   if (isApproved !== undefined) {
-    filter.isApproved = isApproved === "true";
+    filter.isApproved = isApproved === 'true';
   }
   if (rating) filter.rating = rating;
   if (foodId) filter.food = foodId;
 
   const sort = {
-    [sortBy]: sortOrder === "desc" ? -1 : 1,
+    [sortBy]: sortOrder === 'desc' ? -1 : 1,
   };
 
   const [reviews, total] = await reviewRepository.findAll(filter, {
@@ -276,7 +336,7 @@ export const getPublicReviewsForFood = async (foodId, query) => {
 
   const filter = {
     food: foodId,
-    type: "food",
+    type: 'food',
     isApproved: true,
   };
 
@@ -284,7 +344,7 @@ export const getPublicReviewsForFood = async (foodId, query) => {
 
   const [reviews, total] = await Promise.all([
     Review.find(filter)
-      .populate("userId", "name")
+      .populate('userId', 'name')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
@@ -310,20 +370,20 @@ export const updateReview = async (reviewId, userId, updateData) => {
   const review = await reviewRepository.findById(reviewId);
 
   if (!review) {
-    throw new NotFoundError("Review not found");
+    throw new NotFoundError('Review not found');
   }
 
   if (review.userId.toString() !== userId.toString()) {
-    throw new BadRequestError("You can only update your own reviews");
+    throw new BadRequestError('You can only update your own reviews');
   }
 
   const updatedReview = await reviewRepository.updateById(reviewId, updateData);
 
-  if (review.type === "food" && review.food) {
+  if (review.type === 'food' && review.food) {
     await updateFoodRating(review.food);
   }
 
-  logger.info("Review updated", { reviewId, userId });
+  logger.info('Review updated', { reviewId, userId });
 
   return updatedReview;
 };
@@ -332,20 +392,20 @@ export const deleteReview = async (reviewId, userId) => {
   const review = await reviewRepository.findById(reviewId);
 
   if (!review) {
-    throw new NotFoundError("Review not found");
+    throw new NotFoundError('Review not found');
   }
 
   if (review.userId.toString() !== userId.toString()) {
-    throw new BadRequestError("You can only delete your own reviews");
+    throw new BadRequestError('You can only delete your own reviews');
   }
 
   await reviewRepository.deleteById(reviewId);
 
-  if (review.type === "food" && review.food) {
+  if (review.type === 'food' && review.food) {
     await updateFoodRating(review.food);
   }
 
-  logger.info("Review deleted", { reviewId, userId });
+  logger.info('Review deleted', { reviewId, userId });
 
   return true;
 };
@@ -354,17 +414,17 @@ export const moderateReview = async (reviewId, moderationData, adminId) => {
   const review = await reviewRepository.findById(reviewId);
 
   if (!review) {
-    throw new NotFoundError("Review not found");
+    throw new NotFoundError('Review not found');
   }
 
   review.isApproved = moderationData.isApproved;
   await review.save();
 
-  if (review.type === "food" && review.food) {
+  if (review.type === 'food' && review.food) {
     await updateFoodRating(review.food);
   }
 
-  logger.info("Review moderated", {
+  logger.info('Review moderated', {
     reviewId,
     adminId,
     isApproved: moderationData.isApproved,
@@ -377,7 +437,7 @@ export const respondToReview = async (reviewId, response, adminId) => {
   const review = await reviewRepository.findById(reviewId);
 
   if (!review) {
-    throw new NotFoundError("Review not found");
+    throw new NotFoundError('Review not found');
   }
 
   review.adminResponse = {
@@ -388,7 +448,7 @@ export const respondToReview = async (reviewId, response, adminId) => {
 
   await review.save();
 
-  logger.info("Review responded", { reviewId, adminId });
+  logger.info('Review responded', { reviewId, adminId });
 
   return review;
 };
@@ -397,7 +457,7 @@ export const markReviewHelpful = async (reviewId) => {
   const review = await reviewRepository.findById(reviewId);
 
   if (!review) {
-    throw new NotFoundError("Review not found");
+    throw new NotFoundError('Review not found');
   }
 
   review.helpfulVotes += 1;
@@ -409,13 +469,13 @@ export const markReviewHelpful = async (reviewId) => {
 export const getEligibleOrdersForReview = async (userId) => {
   const orders = await Order.find({
     userId,
-    status: "completed",
-  }).select("_id orderNumber items createdAt");
+    status: 'completed',
+  }).select('_id orderNumber items createdAt');
 
   const reviewedFoods = await Review.find({
     userId,
-    type: "food",
-  }).select("food");
+    type: 'food',
+  }).select('food');
 
   const reviewedFoodIds = new Set(reviewedFoods.map((r) => r.food.toString()));
 

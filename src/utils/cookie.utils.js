@@ -1,11 +1,11 @@
-import { env } from "../config/env.js";
+import { env } from '../config/env.js';
 
 export const getCookieOptions = (maxAge = null) => {
   const options = {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
   };
 
   if (maxAge) {

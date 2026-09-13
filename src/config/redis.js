@@ -1,6 +1,6 @@
-import { Redis } from "@upstash/redis";
-import { env } from "./env.js";
-import { logger } from "../utils/logger.js";
+import { Redis } from '@upstash/redis';
+import { env } from './env.js';
+import { logger } from '../utils/logger.js';
 
 let redisClient = null;
 let redisReady = false;
@@ -11,7 +11,7 @@ export const connectRedis = async () => {
   }
 
   if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
-    logger.warn("Upstash Redis credentials not set");
+    logger.warn('Upstash Redis credentials not set');
     redisReady = false;
     return false;
   }
@@ -24,10 +24,10 @@ export const connectRedis = async () => {
 
     await redisClient.ping();
     redisReady = true;
-    logger.info("Upstash Redis connected");
+    logger.info('Upstash Redis connected');
     return true;
   } catch (error) {
-    logger.warn("Upstash Redis connection failed", { error: error.message });
+    logger.warn('Upstash Redis connection failed', { error: error.message });
     redisReady = false;
     return false;
   }

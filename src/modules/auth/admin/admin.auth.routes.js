@@ -1,13 +1,13 @@
-import { Router } from "express";
-import { validateBody } from "../../../middlewares/validate.middleware.js";
-import { authRateLimiter } from "../../../middlewares/rateLimiter.middleware.js";
+import { Router } from 'express';
+import { validateBody } from '../../../middlewares/validate.middleware.js';
+import { authRateLimiter } from '../../../middlewares/rateLimiter.middleware.js';
 import {
   adminLoginSchema,
   changePasswordSchema,
   createAdminSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
-} from "./admin.auth.validator.js";
+} from './admin.auth.validator.js';
 import {
   loginController,
   refreshController,
@@ -16,12 +16,12 @@ import {
   createAdminController,
   requestPasswordResetController,
   resetPasswordController,
-} from "./admin.auth.controller.js";
-import { requirePermission } from "../../../middlewares/authorize.middleware.js";
-import { PERMISSIONS } from "../../../constants/permissions.js";
-import { createAuthMiddleware } from "../../../middlewares/auth.base.middleware.js";
-import { env } from "../../../config/env.js";
-import { Admin } from "./admin.model.js";
+} from './admin.auth.controller.js';
+import { requirePermission } from '../../../middlewares/authorize.middleware.js';
+import { PERMISSIONS } from '../../../constants/permissions.js';
+import { createAuthMiddleware } from '../../../middlewares/auth.base.middleware.js';
+import { env } from '../../../config/env.js';
+import { Admin } from './admin.model.js';
 
 const router = Router();
 
@@ -35,21 +35,21 @@ const adminAuth = createAuthMiddleware(
 
 // Public routes
 router.post(
-  "/login",
+  '/login',
   authRateLimiter,
   validateBody(adminLoginSchema),
   loginController,
 );
-router.post("/refresh", refreshController);
-router.post("/logout", logoutController);
+router.post('/refresh', refreshController);
+router.post('/logout', logoutController);
 router.post(
-  "/request-reset-password",
+  '/request-reset-password',
   authRateLimiter,
   validateBody(requestPasswordResetSchema),
   requestPasswordResetController,
 );
 router.post(
-  "/reset-password",
+  '/reset-password',
   authRateLimiter,
   validateBody(resetPasswordSchema),
   resetPasswordController,
@@ -58,12 +58,12 @@ router.post(
 // Protected routes
 router.use(adminAuth);
 router.post(
-  "/change-password",
+  '/change-password',
   validateBody(changePasswordSchema),
   changePasswordController,
 );
 router.post(
-  "/create",
+  '/create',
   requirePermission(PERMISSIONS.ADMINS_MANAGE),
   validateBody(createAdminSchema),
   createAdminController,

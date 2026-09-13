@@ -5,31 +5,31 @@
  * @returns {string} Sanitized HTML
  */
 export const sanitizeHtml = (html) => {
-  if (!html) return "";
+  if (!html) return '';
 
   return (
     html
       // Remove script tags and their content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       // Remove inline event handlers
-      .replace(/on\w+="[^"]*"/g, "")
-      .replace(/on\w+='[^']*'/g, "")
-      .replace(/on\w+=[^\s>]+/g, "")
+      .replace(/on\w+="[^"]*"/g, '')
+      .replace(/on\w+='[^']*'/g, '')
+      .replace(/on\w+=[^\s>]+/g, '')
       // Remove javascript: URLs
-      .replace(/javascript:/gi, "")
-      .replace(/vbscript:/gi, "")
-      .replace(/data:text\/html/gi, "")
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:text\/html/gi, '')
       // Remove iframes
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
       // Remove object and embed tags
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
-      .replace(/<embed\b[^>]*>/gi, "")
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed\b[^>]*>/gi, '')
       // Remove meta refresh
-      .replace(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*>/gi, "")
+      .replace(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*>/gi, '')
       // Remove base tags
-      .replace(/<base\b[^>]*>/gi, "")
+      .replace(/<base\b[^>]*>/gi, '')
       // Remove link tags with javascript
-      .replace(/<link[^>]*href=["']?javascript:[^>]*>/gi, "")
+      .replace(/<link[^>]*href=["']?javascript:[^>]*>/gi, '')
   );
 };
 
@@ -39,13 +39,13 @@ export const sanitizeHtml = (html) => {
  * @returns {string} Plain text
  */
 export const sanitizePlainText = (text) => {
-  if (!text) return "";
+  if (!text) return '';
 
   return text
-    .replace(/<[^>]*>/g, "") // Remove all HTML tags
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
+    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
 };
@@ -77,10 +77,10 @@ export const isSafeHtml = (html) => {
  * @returns {string} Sanitized URL
  */
 export const sanitizeUrl = (url) => {
-  if (!url) return "";
+  if (!url) return '';
 
   // Only allow http, https URLs
-  const safeProtocols = ["http:", "https:"];
+  const safeProtocols = ['http:', 'https:'];
 
   try {
     const parsedUrl = new URL(url);
@@ -91,7 +91,7 @@ export const sanitizeUrl = (url) => {
     // Not a valid URL, return empty
   }
 
-  return "";
+  return '';
 };
 
 /**
@@ -100,12 +100,12 @@ export const sanitizeUrl = (url) => {
  * @returns {string} Escaped text
  */
 export const escapeHtml = (text) => {
-  if (!text) return "";
+  if (!text) return '';
 
   return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 };

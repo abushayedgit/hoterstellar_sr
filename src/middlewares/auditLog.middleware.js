@@ -1,10 +1,10 @@
-import { logger } from "../utils/logger.js";
+import { logger } from '../utils/logger.js';
 
 export const auditLog = (action, getResourceId = null) => {
   return async (req, res, next) => {
     const start = Date.now();
 
-    res.on("finish", () => {
+    res.on('finish', () => {
       const duration = Date.now() - start;
       const resourceId = getResourceId
         ? getResourceId(req)
@@ -12,11 +12,11 @@ export const auditLog = (action, getResourceId = null) => {
 
       logger.info(
         {
-          type: "AUDIT",
+          type: 'AUDIT',
           action,
           actor: {
             id: req.auth?.user?.id || req.auth?.user?._id || null,
-            role: req.auth?.user?.role || req.auth?.role || "guest",
+            role: req.auth?.user?.role || req.auth?.role || 'guest',
             ip: req.ip,
           },
           resource: resourceId,
@@ -27,7 +27,7 @@ export const auditLog = (action, getResourceId = null) => {
           requestId: req.requestId,
           timestamp: new Date().toISOString(),
         },
-        "Audit log",
+        'Audit log',
       );
     });
 

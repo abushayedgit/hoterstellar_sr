@@ -1,4 +1,4 @@
-import { Contact } from "./contact.model.js";
+import { Contact } from './contact.model.js';
 
 export const contactRepository = {
   findById: (contactId) => Contact.findById(contactId),

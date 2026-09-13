@@ -4,7 +4,7 @@ import {
   getCategoryById,
   updateCategory,
   deleteCategory,
-} from "./category.service.js";
+} from './category.service.js';
 
 export const createCategoryController = async (req, res, next) => {
   try {
@@ -16,8 +16,8 @@ export const createCategoryController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Category created",
+      code: 'CREATED',
+      message: 'Category created',
       data: { category },
     });
   } catch (error) {
@@ -32,8 +32,8 @@ export const listCategoriesController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Categories retrieved",
+      code: 'OK',
+      message: 'Categories retrieved',
       data: result,
     });
   } catch (error) {
@@ -50,8 +50,8 @@ export const getCategoryController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Category retrieved",
+      code: 'OK',
+      message: 'Category retrieved',
       data: { category },
     });
   } catch (error) {
@@ -70,8 +70,8 @@ export const updateCategoryController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Category updated",
+      code: 'OK',
+      message: 'Category updated',
       data: { category },
     });
   } catch (error) {
@@ -88,8 +88,8 @@ export const deleteCategoryController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Category deleted",
+      code: 'OK',
+      message: 'Category deleted',
     });
   } catch (error) {
     next(error);

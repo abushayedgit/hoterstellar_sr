@@ -1,4 +1,4 @@
-import { Admin } from "../auth/admin/admin.model.js";
+import { Admin } from '../auth/admin/admin.model.js';
 
 export const adminRepository = {
   findById: (id) => Admin.findById(id),
@@ -10,7 +10,7 @@ export const adminRepository = {
       page = 1,
       limit = 10,
       sort = { createdAt: -1 },
-      select = "",
+      select = '',
     } = options;
 
     const skip = (page - 1) * limit;

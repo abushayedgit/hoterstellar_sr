@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../../models/base.model.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -25,22 +25,22 @@ const userSchema = new mongoose.Schema(
     district: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
     area: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
     address: {
       type: String,
       trim: true,
-      default: "",
+      default: '',
     },
     gender: {
       type: String,
-      enum: ["male", "female", "other", ""],
-      default: "",
+      enum: ['male', 'female', 'other', ''],
+      default: '',
     },
     age: {
       type: Number,
@@ -79,4 +79,4 @@ userSchema.methods.isDeleted = function () {
   return this.deletedAt !== null;
 };
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.model('User', userSchema);

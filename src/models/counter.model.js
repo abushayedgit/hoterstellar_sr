@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "./base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from './base.model.js';
 
 const counterSchema = new mongoose.Schema(
   {
@@ -20,7 +20,7 @@ const counterSchema = new mongoose.Schema(
 
 counterSchema.index({ key: 1 }, { unique: true });
 
-export const Counter = mongoose.model("Counter", counterSchema);
+export const Counter = mongoose.model('Counter', counterSchema);
 
 export const getNextSequence = async (key) => {
   const result = await Counter.findOneAndUpdate(

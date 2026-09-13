@@ -1,44 +1,44 @@
-import crypto from "crypto";
-import { Admin } from "./admin.model.js";
-import { AdminSession } from "./adminSession.model.js";
-import { env } from "../../../config/env.js";
-import { SECURITY } from "../../../constants/security.js";
+import crypto from 'crypto';
+import { Admin } from './admin.model.js';
+import { AdminSession } from './adminSession.model.js';
+import { env } from '../../../config/env.js';
+import { SECURITY } from '../../../constants/security.js';
 import {
   generateRandomToken,
   hashToken,
   generateTokenPair,
-} from "../../../utils/token.utils.js";
-import { AuthenticationError } from "../../../errors/AuthenticationError.js";
-import { NotFoundError } from "../../../errors/NotFoundError.js";
-import { BadRequestError } from "../../../errors/BadRequestError.js";
-import { ConflictError } from "../../../errors/ConflictError.js";
-import { logger } from "../../../utils/logger.js";
-import { getBrevoClient } from "../../../config/brevo.js";
-import { emitAdminEvent } from "../../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../../constants/socketEvents.js";
+} from '../../../utils/token.utils.js';
+import { AuthenticationError } from '../../../errors/AuthenticationError.js';
+import { NotFoundError } from '../../../errors/NotFoundError.js';
+import { BadRequestError } from '../../../errors/BadRequestError.js';
+import { ConflictError } from '../../../errors/ConflictError.js';
+import { logger } from '../../../utils/logger.js';
+import { getBrevoClient } from '../../../config/brevo.js';
+import { emitAdminEvent } from '../../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../../constants/socketEvents.js';
 
 export const adminLogin = async ({ email, password, deviceInfo }) => {
-  const admin = await Admin.findOne({ email }).select("+password");
+  const admin = await Admin.findOne({ email }).select('+password');
 
   if (!admin) {
-    throw new AuthenticationError("Invalid email or password");
+    throw new AuthenticationError('Invalid email or password');
   }
 
   if (!admin.isActive) {
-    throw new AuthenticationError("Account is deactivated");
+    throw new AuthenticationError('Account is deactivated');
   }
 
   const isPasswordValid = await admin.comparePassword(password);
 
   if (!isPasswordValid) {
-    throw new AuthenticationError("Invalid email or password");
+    throw new AuthenticationError('Invalid email or password');
   }
 
   const payload = {
     sub: admin._id.toString(),
     adminId: admin._id.toString(),
     role: admin.role,
-    type: "admin",
+    type: 'admin',
   };
 
   const { accessToken, refreshToken, refreshTokenHash } = generateTokenPair(
@@ -50,7 +50,7 @@ export const adminLogin = async ({ email, password, deviceInfo }) => {
   await AdminSession.create({
     adminId: admin._id,
     refreshTokenHash,
-    deviceInfo: deviceInfo || "Unknown device",
+    deviceInfo: deviceInfo || 'Unknown device',
     issuedAt: new Date(),
     expiresAt: new Date(
       Date.now() + SECURITY.REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
@@ -60,7 +60,7 @@ export const adminLogin = async ({ email, password, deviceInfo }) => {
   admin.lastLoginAt = new Date();
   await admin.save();
 
-  logger.info("Admin logged in", { adminId: admin._id, email: admin.email });
+  logger.info('Admin logged in', { adminId: admin._id, email: admin.email });
 
   return {
     accessToken,
@@ -73,17 +73,17 @@ export const adminLogin = async ({ email, password, deviceInfo }) => {
 export const adminRefresh = async (refreshToken, deviceInfo) => {
   const refreshTokenHash = hashToken(refreshToken);
   const session = await AdminSession.findOne({ refreshTokenHash }).select(
-    "+refreshTokenHash",
+    '+refreshTokenHash',
   );
 
   if (!session || !session.isActive()) {
-    throw new AuthenticationError("Invalid refresh token");
+    throw new AuthenticationError('Invalid refresh token');
   }
 
   const admin = await Admin.findById(session.adminId);
 
   if (!admin || !admin.isActive) {
-    throw new AuthenticationError("Account is deactivated");
+    throw new AuthenticationError('Account is deactivated');
   }
 
   // Rotate refresh token
@@ -94,7 +94,7 @@ export const adminRefresh = async (refreshToken, deviceInfo) => {
     sub: admin._id.toString(),
     adminId: admin._id.toString(),
     role: admin.role,
-    type: "admin",
+    type: 'admin',
   };
 
   const {
@@ -110,7 +110,7 @@ export const adminRefresh = async (refreshToken, deviceInfo) => {
   const newSession = await AdminSession.create({
     adminId: admin._id,
     refreshTokenHash: newRefreshTokenHash,
-    deviceInfo: deviceInfo || "Unknown device",
+    deviceInfo: deviceInfo || 'Unknown device',
     issuedAt: new Date(),
     expiresAt: new Date(
       Date.now() + SECURITY.REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
@@ -144,16 +144,16 @@ export const adminLogout = async (refreshToken) => {
 };
 
 export const changePassword = async (adminId, currentPassword, newPassword) => {
-  const admin = await Admin.findById(adminId).select("+password");
+  const admin = await Admin.findById(adminId).select('+password');
 
   if (!admin) {
-    throw new NotFoundError("Admin not found");
+    throw new NotFoundError('Admin not found');
   }
 
   const isPasswordValid = await admin.comparePassword(currentPassword);
 
   if (!isPasswordValid) {
-    throw new AuthenticationError("Current password is incorrect");
+    throw new AuthenticationError('Current password is incorrect');
   }
 
   admin.password = newPassword;
@@ -166,7 +166,7 @@ export const changePassword = async (adminId, currentPassword, newPassword) => {
     { revokedAt: new Date() },
   );
 
-  logger.info("Admin changed password", { adminId: admin._id });
+  logger.info('Admin changed password', { adminId: admin._id });
 
   return true;
 };
@@ -176,11 +176,11 @@ export const createAdmin = async (adminData, createdByAdminId) => {
 
   const existingAdmin = await Admin.findOne({ email });
   if (existingAdmin) {
-    throw new ConflictError("Admin with this email already exists");
+    throw new ConflictError('Admin with this email already exists');
   }
 
   // Generate temporary password
-  const tempPassword = crypto.randomBytes(12).toString("base64").slice(0, 16);
+  const tempPassword = crypto.randomBytes(12).toString('base64').slice(0, 16);
 
   const admin = await Admin.create({
     email,
@@ -197,7 +197,7 @@ export const createAdmin = async (adminData, createdByAdminId) => {
     try {
       await brevoClient.sendEmail({
         to: email,
-        subject: "Your Hoterstellar Admin Account",
+        subject: 'Your Hoterstellar Admin Account',
         html: `
           <h2>Welcome to Hoterstellar</h2>
           <p>Your admin account has been created.</p>
@@ -207,7 +207,7 @@ export const createAdmin = async (adminData, createdByAdminId) => {
         `,
       });
     } catch (error) {
-      logger.error("Failed to send admin welcome email", {
+      logger.error('Failed to send admin welcome email', {
         error: error.message,
       });
     }
@@ -218,7 +218,7 @@ export const createAdmin = async (adminData, createdByAdminId) => {
     name: admin.name,
     role: admin.role,
   });
-  logger.info("Admin created", {
+  logger.info('Admin created', {
     adminId: admin._id,
     createdBy: createdByAdminId,
   });
@@ -248,7 +248,7 @@ export const requestPasswordReset = async (email) => {
       const resetUrl = `${env.CLIENT_DASHBOARD_URL}/reset-password?token=${resetToken}`;
       await brevoClient.sendEmail({
         to: email,
-        subject: "Reset Your Admin Password",
+        subject: 'Reset Your Admin Password',
         html: `
           <h2>Password Reset Request</h2>
           <p>Click the link below to reset your password:</p>
@@ -257,13 +257,13 @@ export const requestPasswordReset = async (email) => {
         `,
       });
     } catch (error) {
-      logger.error("Failed to send password reset email", {
+      logger.error('Failed to send password reset email', {
         error: error.message,
       });
     }
   }
 
-  logger.info("Password reset requested", { email });
+  logger.info('Password reset requested', { email });
 
   return true;
 };
@@ -271,5 +271,5 @@ export const requestPasswordReset = async (email) => {
 export const resetPassword = async (token, newPassword) => {
   // In production, verify token from Redis
   // For now, just update password
-  throw new BadRequestError("Password reset not fully implemented yet");
+  throw new BadRequestError('Password reset not fully implemented yet');
 };

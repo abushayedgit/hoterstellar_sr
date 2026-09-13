@@ -1,4 +1,4 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const tableBookingConfirmationTemplate = ({
   bookingNumber,
@@ -6,8 +6,8 @@ export const tableBookingConfirmationTemplate = ({
   date,
   time,
   guestCount,
-  tablePreference = "",
-  specialRequests = "",
+  tablePreference = '',
+  specialRequests = '',
 }) => {
   const content = `
     <p class="content-text">Dear ${customerName},</p>
@@ -41,7 +41,7 @@ export const tableBookingConfirmationTemplate = ({
         <span class="info-value">${tablePreference}</span>
       </div>
       `
-          : ""
+          : ''
       }
       ${
         specialRequests
@@ -51,7 +51,7 @@ export const tableBookingConfirmationTemplate = ({
         <span class="info-value">${specialRequests}</span>
       </div>
       `
-          : ""
+          : ''
       }
     </div>
     
@@ -61,7 +61,7 @@ export const tableBookingConfirmationTemplate = ({
   `;
 
   return baseLayout({
-    title: "Table Reservation Confirmed",
+    title: 'Table Reservation Confirmed',
     preheader: `Your table booking ${bookingNumber} is confirmed`,
     content,
   });

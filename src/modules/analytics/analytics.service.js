@@ -1,16 +1,16 @@
-import { Order } from "../order/order.model.js";
-import { Food } from "../food/food.model.js";
-import { TableBooking } from "../booking/table/tableBooking.model.js";
-import { EventBooking } from "../booking/event/eventBooking.model.js";
-import { Review } from "../review/review.model.js";
-import { Visitor } from "../visitor/visitor.model.js";
-import { PageTracking } from "../visitor/pageTracking.model.js";
-import { AnalyticsDeletionConfirmation } from "./analytics.model.js";
-import { env } from "../../config/env.js";
-import { logger } from "../../utils/logger.js";
-import { hashToken, generateOTP } from "../../utils/token.utils.js";
-import { getBrevoClient } from "../../config/brevo.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
+import { Order } from '../order/order.model.js';
+import { Food } from '../food/food.model.js';
+import { TableBooking } from '../booking/table/tableBooking.model.js';
+import { EventBooking } from '../booking/event/eventBooking.model.js';
+import { Review } from '../review/review.model.js';
+import { Visitor } from '../visitor/visitor.model.js';
+import { PageTracking } from '../visitor/pageTracking.model.js';
+import { AnalyticsDeletionConfirmation } from './analytics.model.js';
+import { env } from '../../config/env.js';
+import { logger } from '../../utils/logger.js';
+import { hashToken, generateOTP } from '../../utils/token.utils.js';
+import { getBrevoClient } from '../../config/brevo.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
 
 const getDateRange = (period, year, month, day) => {
   const now = new Date();
@@ -21,11 +21,11 @@ const getDateRange = (period, year, month, day) => {
   let startDate, endDate;
 
   switch (period) {
-    case "daily":
+    case 'daily':
       startDate = new Date(targetYear, targetMonth - 1, targetDay);
       endDate = new Date(targetYear, targetMonth - 1, targetDay + 1);
       break;
-    case "weekly": {
+    case 'weekly': {
       const currentDay = targetDay || now.getDate();
       const currentDate = new Date(targetYear, targetMonth - 1, currentDay);
       const dayOfWeek = currentDate.getDay();
@@ -35,15 +35,15 @@ const getDateRange = (period, year, month, day) => {
       endDate = new Date(targetYear, targetMonth - 1, diff + 7);
       break;
     }
-    case "monthly":
+    case 'monthly':
       startDate = new Date(targetYear, targetMonth - 1, 1);
       endDate = new Date(targetYear, targetMonth, 1);
       break;
-    case "yearly":
+    case 'yearly':
       startDate = new Date(targetYear, 0, 1);
       endDate = new Date(targetYear + 1, 0, 1);
       break;
-    case "halfYearly": {
+    case 'halfYearly': {
       const half = Math.ceil(targetMonth / 6);
       startDate = new Date(targetYear, (half - 1) * 6, 1);
       endDate = new Date(targetYear, half * 6, 1);
@@ -69,20 +69,20 @@ export const getOrderAnalytics = async (query) => {
           $group: {
             _id: null,
             totalOrders: { $sum: 1 },
-            totalRevenue: { $sum: "$totalAmount" },
-            averageOrderValue: { $avg: "$totalAmount" },
-            maxOrderValue: { $max: "$totalAmount" },
-            minOrderValue: { $min: "$totalAmount" },
+            totalRevenue: { $sum: '$totalAmount' },
+            averageOrderValue: { $avg: '$totalAmount' },
+            maxOrderValue: { $max: '$totalAmount' },
+            minOrderValue: { $min: '$totalAmount' },
           },
         },
       ]),
       Order.aggregate([
         { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
-        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       Order.aggregate([
         { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
-        { $group: { _id: "$orderType", count: { $sum: 1 } } },
+        { $group: { _id: '$orderType', count: { $sum: 1 } } },
       ]),
       Order.aggregate([
         { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
@@ -90,13 +90,13 @@ export const getOrderAnalytics = async (query) => {
           $group: {
             _id: {
               $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt",
+                format: '%Y-%m-%d',
+                date: '$createdAt',
                 timezone: env.BUSINESS_TIMEZONE,
               },
             },
             orders: { $sum: 1 },
-            revenue: { $sum: "$totalAmount" },
+            revenue: { $sum: '$totalAmount' },
           },
         },
         { $sort: { _id: 1 } },
@@ -126,13 +126,13 @@ export const getFoodAnalytics = async (query) => {
   const [topFoods, categoryBreakdown, foodRatings] = await Promise.all([
     Order.aggregate([
       { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
-      { $unwind: "$items" },
+      { $unwind: '$items' },
       {
         $group: {
-          _id: "$items.food",
-          name: { $first: "$items.name" },
-          totalQuantity: { $sum: "$items.quantity" },
-          totalRevenue: { $sum: "$items.lineTotal" },
+          _id: '$items.food',
+          name: { $first: '$items.name' },
+          totalQuantity: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: '$items.lineTotal' },
         },
       },
       { $sort: { totalQuantity: -1 } },
@@ -141,25 +141,25 @@ export const getFoodAnalytics = async (query) => {
     Food.aggregate([
       {
         $group: {
-          _id: "$category",
+          _id: '$category',
           totalFoods: { $sum: 1 },
-          averagePrice: { $avg: "$price" },
-          availableFoods: { $sum: { $cond: ["$isAvailable", 1, 0] } },
+          averagePrice: { $avg: '$price' },
+          availableFoods: { $sum: { $cond: ['$isAvailable', 1, 0] } },
         },
       },
       {
         $lookup: {
-          from: "categories",
-          localField: "_id",
-          foreignField: "_id",
-          as: "category",
+          from: 'categories',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'category',
         },
       },
-      { $unwind: "$category" },
+      { $unwind: '$category' },
       {
         $project: {
           _id: 1,
-          categoryName: "$category.name",
+          categoryName: '$category.name',
           totalFoods: 1,
           averagePrice: 1,
           availableFoods: 1,
@@ -167,11 +167,11 @@ export const getFoodAnalytics = async (query) => {
       },
     ]),
     Review.aggregate([
-      { $match: { type: "food", isApproved: true } },
+      { $match: { type: 'food', isApproved: true } },
       {
         $group: {
-          _id: "$food",
-          averageRating: { $avg: "$rating" },
+          _id: '$food',
+          averageRating: { $avg: '$rating' },
           totalReviews: { $sum: 1 },
         },
       },
@@ -179,17 +179,17 @@ export const getFoodAnalytics = async (query) => {
       { $limit: 10 },
       {
         $lookup: {
-          from: "foods",
-          localField: "_id",
-          foreignField: "_id",
-          as: "food",
+          from: 'foods',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'food',
         },
       },
-      { $unwind: "$food" },
+      { $unwind: '$food' },
       {
         $project: {
           _id: 1,
-          foodName: "$food.name",
+          foodName: '$food.name',
           averageRating: 1,
           totalReviews: 1,
         },
@@ -218,12 +218,12 @@ export const getBookingAnalytics = async (query) => {
           _id: null,
           totalBookings: { $sum: 1 },
           confirmedBookings: {
-            $sum: { $cond: [{ $eq: ["$status", "confirmed"] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] },
           },
           cancelledBookings: {
-            $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] },
           },
-          averageGuests: { $avg: "$guestCount" },
+          averageGuests: { $avg: '$guestCount' },
         },
       },
     ]),
@@ -234,12 +234,12 @@ export const getBookingAnalytics = async (query) => {
           _id: null,
           totalBookings: { $sum: 1 },
           confirmedBookings: {
-            $sum: { $cond: [{ $eq: ["$status", "confirmed"] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] },
           },
           cancelledBookings: {
-            $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] },
           },
-          averageGuests: { $avg: "$guestCount" },
+          averageGuests: { $avg: '$guestCount' },
         },
       },
     ]),
@@ -275,7 +275,7 @@ export const getReviewAnalytics = async (query) => {
           isApproved: true,
         },
       },
-      { $group: { _id: "$rating", count: { $sum: 1 } } },
+      { $group: { _id: '$rating', count: { $sum: 1 } } },
       { $sort: { _id: -1 } },
     ]),
     Review.aggregate([
@@ -287,9 +287,9 @@ export const getReviewAnalytics = async (query) => {
       },
       {
         $group: {
-          _id: "$type",
+          _id: '$type',
           count: { $sum: 1 },
-          averageRating: { $avg: "$rating" },
+          averageRating: { $avg: '$rating' },
         },
       },
     ]),
@@ -317,19 +317,19 @@ export const getIncomeAnalytics = async (query) => {
       {
         $match: {
           createdAt: { $gte: startDate, $lt: endDate },
-          status: { $ne: "cancelled" },
+          status: { $ne: 'cancelled' },
         },
       },
       {
         $group: {
           _id: {
             $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$createdAt",
+              format: '%Y-%m-%d',
+              date: '$createdAt',
               timezone: env.BUSINESS_TIMEZONE,
             },
           },
-          revenue: { $sum: "$totalAmount" },
+          revenue: { $sum: '$totalAmount' },
           orders: { $sum: 1 },
         },
       },
@@ -339,14 +339,14 @@ export const getIncomeAnalytics = async (query) => {
       {
         $match: {
           createdAt: { $gte: startDate, $lt: endDate },
-          status: { $in: ["confirmed", "deposit_paid", "completed"] },
+          status: { $in: ['confirmed', 'deposit_paid', 'completed'] },
         },
       },
       {
         $group: {
           _id: null,
-          totalQuotation: { $sum: { $ifNull: ["$quotationAmount", 0] } },
-          totalDeposit: { $sum: { $ifNull: ["$depositAmount", 0] } },
+          totalQuotation: { $sum: { $ifNull: ['$quotationAmount', 0] } },
+          totalDeposit: { $sum: { $ifNull: ['$depositAmount', 0] } },
         },
       },
     ]),
@@ -386,7 +386,7 @@ export const requestAnalyticsDeletion = async (adminId, email) => {
   if (brevoClient) {
     await brevoClient.sendEmail({
       to: email,
-      subject: "Analytics Deletion Confirmation - Hoterstellar",
+      subject: 'Analytics Deletion Confirmation - Hoterstellar',
       html: `
         <h2>Analytics Deletion Confirmation</h2>
         <p>Your confirmation code is:</p>
@@ -397,7 +397,7 @@ export const requestAnalyticsDeletion = async (adminId, email) => {
     });
   }
 
-  logger.info("Analytics deletion requested", { adminId });
+  logger.info('Analytics deletion requested', { adminId });
 
   return true;
 };
@@ -407,21 +407,21 @@ export const deleteAnalytics = async (adminId, code) => {
     adminId,
     consumedAt: null,
     expiresAt: { $gt: new Date() },
-  }).select("+codeHash");
+  }).select('+codeHash');
 
   if (!confirmation) {
-    throw new BadRequestError("No active deletion confirmation found");
+    throw new BadRequestError('No active deletion confirmation found');
   }
 
   if (confirmation.attempts >= 5) {
-    throw new BadRequestError("Too many attempts. Please request a new code.");
+    throw new BadRequestError('Too many attempts. Please request a new code.');
   }
 
   const codeHash = hashToken(code);
   if (codeHash !== confirmation.codeHash) {
     confirmation.attempts += 1;
     await confirmation.save();
-    throw new BadRequestError("Invalid confirmation code");
+    throw new BadRequestError('Invalid confirmation code');
   }
 
   confirmation.consumedAt = new Date();
@@ -430,7 +430,7 @@ export const deleteAnalytics = async (adminId, code) => {
   // Delete analytics data
   await Promise.all([Visitor.deleteMany({}), PageTracking.deleteMany({})]);
 
-  logger.info("Analytics deleted", { adminId });
+  logger.info('Analytics deleted', { adminId });
 
   return true;
 };

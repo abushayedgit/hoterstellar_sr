@@ -1,12 +1,12 @@
-import { Visitor } from "./visitor.model.js";
-import { PageTracking } from "./pageTracking.model.js";
-import { logger } from "../../utils/logger.js";
-import axios from "axios";
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { Visitor } from './visitor.model.js';
+import { PageTracking } from './pageTracking.model.js';
+import { logger } from '../../utils/logger.js';
+import axios from 'axios';
+import { emitAdminEvent } from '../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../constants/socketEvents.js';
 
 const getGeolocation = async (ip) => {
-  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") {
+  if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
     return null;
   }
 
@@ -17,43 +17,43 @@ const getGeolocation = async (ip) => {
 
     if (response.data && !response.data.error) {
       return {
-        city: response.data.city || "",
-        region: response.data.region || "",
-        country: response.data.country_name || "",
-        postalCode: response.data.postal || "",
+        city: response.data.city || '',
+        region: response.data.region || '',
+        country: response.data.country_name || '',
+        postalCode: response.data.postal || '',
         latitude: response.data.latitude || null,
         longitude: response.data.longitude || null,
       };
     }
   } catch (error) {
-    logger.warn("Geolocation lookup failed", { ip, error: error.message });
+    logger.warn('Geolocation lookup failed', { ip, error: error.message });
   }
 
   return null;
 };
 
 const parseDeviceInfo = (userAgent) => {
-  if (!userAgent) return { device: "", browser: "" };
+  if (!userAgent) return { device: '', browser: '' };
 
-  let device = "";
-  let browser = "";
+  let device = '';
+  let browser = '';
 
   // Browser detection
-  if (userAgent.includes("Chrome")) browser = "Chrome";
-  else if (userAgent.includes("Firefox")) browser = "Firefox";
-  else if (userAgent.includes("Safari")) browser = "Safari";
-  else if (userAgent.includes("Edge")) browser = "Edge";
-  else if (userAgent.includes("Opera")) browser = "Opera";
-  else browser = "Unknown";
+  if (userAgent.includes('Chrome')) browser = 'Chrome';
+  else if (userAgent.includes('Firefox')) browser = 'Firefox';
+  else if (userAgent.includes('Safari')) browser = 'Safari';
+  else if (userAgent.includes('Edge')) browser = 'Edge';
+  else if (userAgent.includes('Opera')) browser = 'Opera';
+  else browser = 'Unknown';
 
   // Device detection
-  if (userAgent.includes("iPhone")) device = "iPhone";
-  else if (userAgent.includes("iPad")) device = "iPad";
-  else if (userAgent.includes("Android")) device = "Android";
-  else if (userAgent.includes("Windows")) device = "Windows";
-  else if (userAgent.includes("Macintosh")) device = "Mac";
-  else if (userAgent.includes("Linux")) device = "Linux";
-  else device = "Unknown";
+  if (userAgent.includes('iPhone')) device = 'iPhone';
+  else if (userAgent.includes('iPad')) device = 'iPad';
+  else if (userAgent.includes('Android')) device = 'Android';
+  else if (userAgent.includes('Windows')) device = 'Windows';
+  else if (userAgent.includes('Macintosh')) device = 'Mac';
+  else if (userAgent.includes('Linux')) device = 'Linux';
+  else device = 'Unknown';
 
   return { device, browser };
 };
@@ -68,17 +68,17 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
     existingVisitor.ip = ip || existingVisitor.ip;
 
     // Update geolocation if accepted
-    if (consentStatus === "accepted" && ip) {
+    if (consentStatus === 'accepted' && ip) {
       const geoData = await getGeolocation(ip);
       if (geoData) {
         Object.assign(existingVisitor, geoData);
       }
-    } else if (consentStatus === "declined") {
+    } else if (consentStatus === 'declined') {
       // Remove precise geolocation
-      existingVisitor.city = "";
-      existingVisitor.region = "";
-      existingVisitor.country = "";
-      existingVisitor.postalCode = "";
+      existingVisitor.city = '';
+      existingVisitor.region = '';
+      existingVisitor.country = '';
+      existingVisitor.postalCode = '';
       existingVisitor.latitude = null;
       existingVisitor.longitude = null;
     }
@@ -91,11 +91,11 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
 
     await existingVisitor.save();
 
-    if (consentStatus === "accepted") {
+    if (consentStatus === 'accepted') {
       emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_ACCEPTED, {
         guestId,
       });
-    } else if (consentStatus === "declined") {
+    } else if (consentStatus === 'declined') {
       emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_DECLINED, {
         guestId,
       });
@@ -111,7 +111,7 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
   // New visitor
   const visitorData = {
     guestId,
-    ip: ip || "",
+    ip: ip || '',
     consentStatus,
   };
 
@@ -121,7 +121,7 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
     visitorData.browser = deviceInfo.browser;
   }
 
-  if (consentStatus === "accepted" && ip) {
+  if (consentStatus === 'accepted' && ip) {
     const geoData = await getGeolocation(ip);
     if (geoData) {
       Object.assign(visitorData, geoData);
@@ -130,16 +130,16 @@ export const trackVisitor = async (trackData, ip, userAgent) => {
 
   const visitor = await Visitor.create(visitorData);
 
-  logger.info("Visitor tracked", { guestId, consentStatus });
+  logger.info('Visitor tracked', { guestId, consentStatus });
 
   emitAdminEvent(SOCKET_EVENTS.VISITOR_NEW, {
     guestId,
     consentStatus,
   });
 
-  if (consentStatus === "accepted") {
+  if (consentStatus === 'accepted') {
     emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_ACCEPTED, { guestId });
-  } else if (consentStatus === "declined") {
+  } else if (consentStatus === 'declined') {
     emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_DECLINED, { guestId });
   } else {
     emitAdminEvent(SOCKET_EVENTS.VISITOR_CONSENT_PENDING, { guestId });
@@ -155,9 +155,9 @@ export const trackPageView = async (trackData, userId = null) => {
     guestId,
     userId,
     page,
-    referrer: referrer || "",
-    ip: ip || "",
-    userAgent: userAgent || "",
+    referrer: referrer || '',
+    ip: ip || '',
+    userAgent: userAgent || '',
   });
 
   return pageView;
@@ -170,8 +170,8 @@ export const listVisitors = async (query) => {
     consentStatus,
     dateFrom,
     dateTo,
-    sortBy = "createdAt",
-    sortOrder = "desc",
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
   } = query;
 
   const filter = {};
@@ -184,7 +184,7 @@ export const listVisitors = async (query) => {
     if (dateTo) filter.createdAt.$lte = new Date(dateTo);
   }
 
-  const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
   const skip = (page - 1) * limit;
 
   const [visitors, total] = await Promise.all([
@@ -214,8 +214,8 @@ export const listPageViews = async (query) => {
     page: pageFilter,
     dateFrom,
     dateTo,
-    sortBy = "createdAt",
-    sortOrder = "desc",
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
   } = query;
 
   const filter = {};
@@ -228,12 +228,12 @@ export const listPageViews = async (query) => {
     if (dateTo) filter.createdAt.$lte = new Date(dateTo);
   }
 
-  const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
   const skip = (page - 1) * limit;
 
   const [pageViews, total] = await Promise.all([
     PageTracking.find(filter)
-      .populate("userId", "name email")
+      .populate('userId', 'name email')
       .sort(sort)
       .skip(skip)
       .limit(limit),
@@ -268,8 +268,8 @@ export const getVisitorStats = async () => {
   ] = await Promise.all([
     Visitor.countDocuments(),
     Visitor.countDocuments({ createdAt: { $gte: today } }),
-    Visitor.countDocuments({ consentStatus: "accepted" }),
-    Visitor.countDocuments({ consentStatus: "declined" }),
+    Visitor.countDocuments({ consentStatus: 'accepted' }),
+    Visitor.countDocuments({ consentStatus: 'declined' }),
     PageTracking.countDocuments(),
   ]);
 

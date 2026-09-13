@@ -6,7 +6,7 @@ import {
   getIncomeAnalytics,
   requestAnalyticsDeletion,
   deleteAnalytics,
-} from "./analytics.service.js";
+} from './analytics.service.js';
 
 export const getOrderAnalyticsController = async (req, res, next) => {
   try {
@@ -15,8 +15,8 @@ export const getOrderAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Order analytics retrieved",
+      code: 'OK',
+      message: 'Order analytics retrieved',
       data: result,
     });
   } catch (error) {
@@ -31,8 +31,8 @@ export const getFoodAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Food analytics retrieved",
+      code: 'OK',
+      message: 'Food analytics retrieved',
       data: result,
     });
   } catch (error) {
@@ -47,8 +47,8 @@ export const getBookingAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Booking analytics retrieved",
+      code: 'OK',
+      message: 'Booking analytics retrieved',
       data: result,
     });
   } catch (error) {
@@ -63,8 +63,8 @@ export const getReviewAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Review analytics retrieved",
+      code: 'OK',
+      message: 'Review analytics retrieved',
       data: result,
     });
   } catch (error) {
@@ -79,8 +79,8 @@ export const getIncomeAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Income analytics retrieved",
+      code: 'OK',
+      message: 'Income analytics retrieved',
       data: result,
     });
   } catch (error) {
@@ -91,15 +91,15 @@ export const getIncomeAnalyticsController = async (req, res, next) => {
 export const requestAnalyticsDeletionController = async (req, res, next) => {
   try {
     const adminId = req.auth.adminId;
-    const adminEmail = req.auth.user?.email || "";
+    const adminEmail = req.auth.user?.email || '';
 
     await requestAnalyticsDeletion(adminId, adminEmail);
 
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Confirmation code sent to your email",
+      code: 'OK',
+      message: 'Confirmation code sent to your email',
     });
   } catch (error) {
     next(error);
@@ -116,8 +116,8 @@ export const deleteAnalyticsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Analytics deleted successfully",
+      code: 'OK',
+      message: 'Analytics deleted successfully',
     });
   } catch (error) {
     next(error);

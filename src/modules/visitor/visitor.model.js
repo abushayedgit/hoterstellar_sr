@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const visitorSchema = new mongoose.Schema(
   {
@@ -10,23 +10,23 @@ const visitorSchema = new mongoose.Schema(
     },
     ip: {
       type: String,
-      default: "",
+      default: '',
     },
     city: {
       type: String,
-      default: "",
+      default: '',
     },
     region: {
       type: String,
-      default: "",
+      default: '',
     },
     country: {
       type: String,
-      default: "",
+      default: '',
     },
     postalCode: {
       type: String,
-      default: "",
+      default: '',
     },
     latitude: {
       type: Number,
@@ -38,16 +38,16 @@ const visitorSchema = new mongoose.Schema(
     },
     device: {
       type: String,
-      default: "",
+      default: '',
     },
     browser: {
       type: String,
-      default: "",
+      default: '',
     },
     consentStatus: {
       type: String,
-      enum: ["accepted", "declined", "pending"],
-      default: "pending",
+      enum: ['accepted', 'declined', 'pending'],
+      default: 'pending',
       index: true,
     },
   },
@@ -57,4 +57,4 @@ const visitorSchema = new mongoose.Schema(
 visitorSchema.index({ guestId: 1, createdAt: -1 });
 visitorSchema.index({ createdAt: -1 });
 
-export const Visitor = mongoose.model("Visitor", visitorSchema);
+export const Visitor = mongoose.model('Visitor', visitorSchema);

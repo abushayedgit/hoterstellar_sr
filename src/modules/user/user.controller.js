@@ -4,7 +4,7 @@ import {
   softDeleteUser,
   deactivateUser,
   activateUser,
-} from "./user.service.js";
+} from './user.service.js';
 
 export const listUsersController = async (req, res, next) => {
   try {
@@ -13,8 +13,8 @@ export const listUsersController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Users retrieved",
+      code: 'OK',
+      message: 'Users retrieved',
       data: result,
     });
   } catch (error) {
@@ -31,8 +31,8 @@ export const getUserController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "User retrieved",
+      code: 'OK',
+      message: 'User retrieved',
       data: { user },
     });
   } catch (error) {
@@ -49,8 +49,8 @@ export const softDeleteUserController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "User deleted",
+      code: 'OK',
+      message: 'User deleted',
     });
   } catch (error) {
     next(error);
@@ -66,8 +66,8 @@ export const deactivateUserController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "User deactivated",
+      code: 'OK',
+      message: 'User deactivated',
       data: { user },
     });
   } catch (error) {
@@ -84,8 +84,8 @@ export const activateUserController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "User activated",
+      code: 'OK',
+      message: 'User activated',
       data: { user },
     });
   } catch (error) {

@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../../models/base.model.js';
 
 const tableBookingSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const tableBookingSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       default: null,
       index: true,
     },
@@ -29,7 +29,7 @@ const tableBookingSchema = new mongoose.Schema(
       type: String,
       trim: true,
       lowercase: true,
-      default: "",
+      default: '',
     },
     date: {
       type: Date,
@@ -48,47 +48,47 @@ const tableBookingSchema = new mongoose.Schema(
     },
     tablePreference: {
       type: String,
-      enum: ["window", "outdoor", "private", "regular", ""],
-      default: "",
+      enum: ['window', 'outdoor', 'private', 'regular', ''],
+      default: '',
     },
     occasion: {
       type: String,
       enum: [
-        "birthday",
-        "anniversary",
-        "business",
-        "date",
-        "family",
-        "other",
-        "",
+        'birthday',
+        'anniversary',
+        'business',
+        'date',
+        'family',
+        'other',
+        '',
       ],
-      default: "",
+      default: '',
     },
     specialOccasion: {
       type: String,
-      default: "",
+      default: '',
     },
     specialRequests: {
       type: String,
-      default: "",
+      default: '',
       maxlength: 1000,
     },
     status: {
       type: String,
       enum: [
-        "pending",
-        "confirmed",
-        "seated",
-        "completed",
-        "cancelled",
-        "no_show",
+        'pending',
+        'confirmed',
+        'seated',
+        'completed',
+        'cancelled',
+        'no_show',
       ],
-      default: "pending",
+      default: 'pending',
       index: true,
     },
     tableNumber: {
       type: String,
-      default: "",
+      default: '',
     },
     duration: {
       type: Number,
@@ -101,12 +101,12 @@ const tableBookingSchema = new mongoose.Schema(
         status: {
           type: String,
           enum: [
-            "pending",
-            "confirmed",
-            "seated",
-            "completed",
-            "cancelled",
-            "no_show",
+            'pending',
+            'confirmed',
+            'seated',
+            'completed',
+            'cancelled',
+            'no_show',
           ],
           required: true,
         },
@@ -116,12 +116,12 @@ const tableBookingSchema = new mongoose.Schema(
         },
         byAdminId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Admin",
+          ref: 'Admin',
           default: null,
         },
         note: {
           type: String,
-          default: "",
+          default: '',
         },
       },
     ],
@@ -141,9 +141,9 @@ tableBookingSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      status: { $in: ["pending", "confirmed", "seated"] },
+      status: { $in: ['pending', 'confirmed', 'seated'] },
     },
   },
 );
 
-export const TableBooking = mongoose.model("TableBooking", tableBookingSchema);
+export const TableBooking = mongoose.model('TableBooking', tableBookingSchema);
