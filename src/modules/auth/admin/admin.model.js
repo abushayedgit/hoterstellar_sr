@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import { baseSchemaOptions } from "../../../models/base.model.js";
-import { SECURITY } from "../../../constants/security.js";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { baseSchemaOptions } from '../../../models/base.model.js';
+import { SECURITY } from '../../../constants/security.js';
 
 const adminSchema = new mongoose.Schema(
   {
@@ -25,8 +25,8 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["super_admin", "admin", "manager"],
-      default: "admin",
+      enum: ['super_admin', 'admin', 'manager'],
+      default: 'admin',
       index: true,
     },
     isActive: {
@@ -44,7 +44,7 @@ const adminSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: 'Admin',
       default: null,
     },
   },
@@ -53,15 +53,15 @@ const adminSchema = new mongoose.Schema(
 
 adminSchema.index({ role: 1, isActive: 1 });
 
-adminSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return;
+adminSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return;
 
   try {
     const salt = await bcrypt.genSalt(SECURITY.BCRYPT_SALT_ROUNDS);
     this.password = await bcrypt.hash(this.password, salt);
     return;
   } catch (error) {
-    throw new Error("Error hashing password");
+    throw new Error('Error hashing password');
   }
 });
 
@@ -76,4 +76,4 @@ adminSchema.methods.toSafeObject = function () {
   return obj;
 };
 
-export const Admin = mongoose.model("Admin", adminSchema);
+export const Admin = mongoose.model('Admin', adminSchema);

@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const categorySchema = new mongoose.Schema(
   {
@@ -16,15 +16,15 @@ const categorySchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      default: "",
+      default: '',
     },
     image: {
       type: String,
-      default: "",
+      default: '',
     },
     imageId: {
       type: String,
-      default: "",
+      default: '',
     },
     isActive: {
       type: Boolean,
@@ -41,15 +41,15 @@ const categorySchema = new mongoose.Schema(
 
 categorySchema.index({ isActive: 1, displayOrder: 1 });
 
-categorySchema.pre("save", function (next) {
-  if (this.isModified("name") && !this.slug) {
+categorySchema.pre('save', function (next) {
+  if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_-]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
   next();
 });
 
-export const Category = mongoose.model("Category", categorySchema);
+export const Category = mongoose.model('Category', categorySchema);

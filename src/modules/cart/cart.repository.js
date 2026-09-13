@@ -1,4 +1,4 @@
-import { Cart } from "./cart.model.js";
+import { Cart } from './cart.model.js';
 
 export const cartRepository = {
   findByUserId: (userId) => Cart.findOne({ userId }),

@@ -1,4 +1,4 @@
-import { EventBooking } from "./eventBooking.model.js";
+import { EventBooking } from './eventBooking.model.js';
 
 export const eventBookingRepository = {
   findById: (bookingId) => EventBooking.findById(bookingId),
@@ -26,7 +26,7 @@ export const eventBookingRepository = {
 
     return Promise.all([
       EventBooking.find(filter)
-        .populate("userId", "name email phone")
+        .populate('userId', 'name email phone')
         .sort(sort)
         .skip(skip)
         .limit(limit),
@@ -43,7 +43,7 @@ export const eventBookingRepository = {
     bookingId,
     status,
     adminId = null,
-    note = "",
+    note = '',
     additionalData = {},
   ) => {
     const updateData = {

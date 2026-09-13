@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const cartItemSchema = new mongoose.Schema(
   {
     food: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Food",
+      ref: 'Food',
       required: true,
     },
     name: {
@@ -31,7 +31,7 @@ const cartItemSchema = new mongoose.Schema(
     },
     specialInstructions: {
       type: String,
-      default: "",
+      default: '',
       maxlength: 500,
     },
     lineTotal: {
@@ -47,7 +47,7 @@ const cartSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       unique: true,
       index: true,
@@ -94,4 +94,4 @@ cartSchema.methods.recalculateTotals = function () {
   this.updatedAt = new Date();
 };
 
-export const Cart = mongoose.model("Cart", cartSchema);
+export const Cart = mongoose.model('Cart', cartSchema);

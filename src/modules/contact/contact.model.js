@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const contactSchema = new mongoose.Schema(
   {
@@ -18,7 +18,7 @@ const contactSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      default: "",
+      default: '',
       trim: true,
     },
     subject: {
@@ -34,20 +34,20 @@ const contactSchema = new mongoose.Schema(
     },
     ip: {
       type: String,
-      default: "",
+      default: '',
     },
     userAgent: {
       type: String,
-      default: "",
+      default: '',
     },
     referrer: {
       type: String,
-      default: "",
+      default: '',
     },
     status: {
       type: String,
-      enum: ["new", "read", "responded", "archived"],
-      default: "new",
+      enum: ['new', 'read', 'responded', 'archived'],
+      default: 'new',
       index: true,
     },
     isSpam: {
@@ -63,4 +63,4 @@ contactSchema.index({ createdAt: -1 });
 contactSchema.index({ email: 1, createdAt: -1 });
 contactSchema.index({ status: 1, createdAt: -1 });
 
-export const Contact = mongoose.model("Contact", contactSchema);
+export const Contact = mongoose.model('Contact', contactSchema);

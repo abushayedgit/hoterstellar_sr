@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../../models/base.model.js";
-import { SECURITY } from "../../../constants/security.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../../models/base.model.js';
+import { SECURITY } from '../../../constants/security.js';
 
 const userAuthChallengeSchema = new mongoose.Schema(
   {
@@ -18,7 +18,7 @@ const userAuthChallengeSchema = new mongoose.Schema(
     },
     purpose: {
       type: String,
-      enum: ["signup", "signin"],
+      enum: ['signup', 'signin'],
       required: true,
     },
     attempts: {
@@ -62,6 +62,6 @@ userAuthChallengeSchema.methods.hasExceededAttempts = function () {
 };
 
 export const UserAuthChallenge = mongoose.model(
-  "UserAuthChallenge",
+  'UserAuthChallenge',
   userAuthChallengeSchema,
 );

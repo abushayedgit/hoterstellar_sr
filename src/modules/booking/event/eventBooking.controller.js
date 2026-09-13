@@ -6,7 +6,7 @@ import {
   updateEventBooking,
   updateEventBookingStatus,
   cancelEventBooking,
-} from "./eventBooking.service.js";
+} from './eventBooking.service.js';
 
 export const createEventBookingController = async (req, res, next) => {
   try {
@@ -18,8 +18,8 @@ export const createEventBookingController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Event booking created",
+      code: 'CREATED',
+      message: 'Event booking created',
       data: { booking },
     });
   } catch (error) {
@@ -37,8 +37,8 @@ export const getEventBookingController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Booking retrieved",
+      code: 'OK',
+      message: 'Booking retrieved',
       data: { booking },
     });
   } catch (error) {
@@ -55,8 +55,8 @@ export const getUserEventBookingsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Bookings retrieved",
+      code: 'OK',
+      message: 'Bookings retrieved',
       data: result,
     });
   } catch (error) {
@@ -71,8 +71,8 @@ export const listEventBookingsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Bookings retrieved",
+      code: 'OK',
+      message: 'Bookings retrieved',
       data: result,
     });
   } catch (error) {
@@ -89,8 +89,8 @@ export const updateEventBookingController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Booking updated",
+      code: 'OK',
+      message: 'Booking updated',
       data: { booking },
     });
   } catch (error) {
@@ -127,8 +127,8 @@ export const updateEventBookingStatusController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Booking status updated",
+      code: 'OK',
+      message: 'Booking status updated',
       data: { booking },
     });
   } catch (error) {
@@ -148,8 +148,8 @@ export const cancelEventBookingController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Booking cancelled",
+      code: 'OK',
+      message: 'Booking cancelled',
       data: { booking },
     });
   } catch (error) {

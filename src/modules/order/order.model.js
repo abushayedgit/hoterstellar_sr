@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const orderItemSchema = new mongoose.Schema(
   {
     food: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Food",
+      ref: 'Food',
       required: true,
     },
     name: {
@@ -35,7 +35,7 @@ const orderItemSchema = new mongoose.Schema(
     },
     specialInstructions: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { _id: false },
@@ -45,9 +45,9 @@ const orderAddressSchema = new mongoose.Schema(
   {
     street: { type: String, required: true },
     city: { type: String, required: true },
-    state: { type: String, default: "" },
-    zipCode: { type: String, default: "" },
-    country: { type: String, default: "Bangladesh" },
+    state: { type: String, default: '' },
+    zipCode: { type: String, default: '' },
+    country: { type: String, default: 'Bangladesh' },
   },
   { _id: false },
 );
@@ -57,14 +57,14 @@ const orderStatusHistorySchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        "pending",
-        "confirmed",
-        "preparing",
-        "ready",
-        "out_for_delivery",
-        "delivered",
-        "completed",
-        "cancelled",
+        'pending',
+        'confirmed',
+        'preparing',
+        'ready',
+        'out_for_delivery',
+        'delivered',
+        'completed',
+        'cancelled',
       ],
       required: true,
     },
@@ -74,12 +74,12 @@ const orderStatusHistorySchema = new mongoose.Schema(
     },
     byAdminId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: 'Admin',
       default: null,
     },
     note: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { _id: false },
@@ -95,14 +95,14 @@ const orderSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true,
     },
     items: {
       type: [orderItemSchema],
       required: true,
-      validate: [(val) => val.length > 0, "At least one item is required"],
+      validate: [(val) => val.length > 0, 'At least one item is required'],
     },
     subtotal: {
       type: Number,
@@ -134,7 +134,7 @@ const orderSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      default: "",
+      default: '',
     },
     address: {
       type: orderAddressSchema,
@@ -142,32 +142,32 @@ const orderSchema = new mongoose.Schema(
     },
     orderType: {
       type: String,
-      enum: ["pickup", "delivery", "dine_in"],
+      enum: ['pickup', 'delivery', 'dine_in'],
       required: true,
     },
     status: {
       type: String,
       enum: [
-        "pending",
-        "confirmed",
-        "preparing",
-        "ready",
-        "out_for_delivery",
-        "delivered",
-        "completed",
-        "cancelled",
+        'pending',
+        'confirmed',
+        'preparing',
+        'ready',
+        'out_for_delivery',
+        'delivered',
+        'completed',
+        'cancelled',
       ],
-      default: "pending",
+      default: 'pending',
       index: true,
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+      enum: ['pending', 'paid', 'failed', 'refunded'],
+      default: 'pending',
     },
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "online"],
+      enum: ['cash', 'card', 'online'],
       required: true,
     },
     statusHistory: {
@@ -176,7 +176,7 @@ const orderSchema = new mongoose.Schema(
     },
     specialInstructions: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   baseSchemaOptions,
@@ -187,4 +187,4 @@ orderSchema.index({ status: 1, createdAt: -1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ orderNumber: 1 });
 
-export const Order = mongoose.model("Order", orderSchema);
+export const Order = mongoose.model('Order', orderSchema);

@@ -1,8 +1,8 @@
-import crypto from "crypto";
-import jwt from "jsonwebtoken";
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
 export const generateRandomToken = (length = 32) => {
-  return crypto.randomBytes(length).toString("hex");
+  return crypto.randomBytes(length).toString('hex');
 };
 
 export const generateOTP = () => {
@@ -10,14 +10,14 @@ export const generateOTP = () => {
 };
 
 export const hashToken = (token) => {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return crypto.createHash('sha256').update(token).digest('hex');
 };
 
 export const generateAccessToken = (payload, secret, expiresIn) => {
   return jwt.sign(payload, secret, { expiresIn });
 };
 
-export const generateTokenPair = (payload, secret, accessExpiresIn = "15m") => {
+export const generateTokenPair = (payload, secret, accessExpiresIn = '15m') => {
   const accessToken = generateAccessToken(payload, secret, accessExpiresIn);
   const refreshToken = generateRandomToken(48);
   const refreshTokenHash = hashToken(refreshToken);
@@ -33,6 +33,6 @@ export const verifyAccessToken = (token, secret) => {
   try {
     return jwt.verify(token, secret);
   } catch (error) {
-    throw new Error("Invalid or expired access token");
+    throw new Error('Invalid or expired access token');
   }
 };

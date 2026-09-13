@@ -11,7 +11,27 @@ import {
   respondToReview,
   markReviewHelpful,
   getEligibleOrdersForReview,
+  createManualReview,
 } from './review.service.js';
+
+export const createManualReviewController = async (req, res, next) => {
+  try {
+    const adminId = req.auth.adminId;
+    const reviewData = req.body;
+
+    const review = await createManualReview(reviewData, adminId);
+
+    return res.status(201).json({
+      success: true,
+      statusCode: 201,
+      code: 'CREATED',
+      message: 'Manual review created',
+      data: { review },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const createFoodReviewController = async (req, res, next) => {
   try {
@@ -121,11 +141,7 @@ export const listReviewsController = async (req, res, next) => {
   }
 };
 
-export const getPublicReviewsForFoodController = async (
-  req,
-  res,
-  next
-) => {
+export const getPublicReviewsForFoodController = async (req, res, next) => {
   try {
     const { foodId } = req.params;
     const result = await getPublicReviewsForFood(foodId, req.query);
@@ -186,11 +202,7 @@ export const moderateReviewController = async (req, res, next) => {
     const moderationData = req.body;
     const adminId = req.auth.adminId;
 
-    const review = await moderateReview(
-      id,
-      moderationData,
-      adminId
-    );
+    const review = await moderateReview(id, moderationData, adminId);
 
     return res.status(200).json({
       success: true,
@@ -210,11 +222,7 @@ export const respondToReviewController = async (req, res, next) => {
     const { response } = req.body;
     const adminId = req.auth.adminId;
 
-    const review = await respondToReview(
-      id,
-      response,
-      adminId
-    );
+    const review = await respondToReview(id, response, adminId);
 
     return res.status(200).json({
       success: true,
@@ -228,11 +236,7 @@ export const respondToReviewController = async (req, res, next) => {
   }
 };
 
-export const markReviewHelpfulController = async (
-  req,
-  res,
-  next
-) => {
+export const markReviewHelpfulController = async (req, res, next) => {
   try {
     const { id } = req.params;
 

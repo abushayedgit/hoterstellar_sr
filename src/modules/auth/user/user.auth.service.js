@@ -1,35 +1,35 @@
-import { User } from "./user.model.js";
-import { UserAuthChallenge } from "./userAuthChallenge.model.js";
-import { UserSession } from "./userSession.model.js";
-import { env } from "../../../config/env.js";
-import { SECURITY } from "../../../constants/security.js";
+import { User } from './user.model.js';
+import { UserAuthChallenge } from './userAuthChallenge.model.js';
+import { UserSession } from './userSession.model.js';
+import { env } from '../../../config/env.js';
+import { SECURITY } from '../../../constants/security.js';
 import {
   hashToken,
   generateTokenPair,
   generateOTP,
-} from "../../../utils/token.utils.js";
-import { AuthenticationError } from "../../../errors/AuthenticationError.js";
-import { NotFoundError } from "../../../errors/NotFoundError.js";
-import { BadRequestError } from "../../../errors/BadRequestError.js";
-import { ConflictError } from "../../../errors/ConflictError.js";
-import { logger } from "../../../utils/logger.js";
-import { getBrevoClient } from "../../../config/brevo.js";
-import { emitAdminEvent } from "../../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../../constants/socketEvents.js";
+} from '../../../utils/token.utils.js';
+import { AuthenticationError } from '../../../errors/AuthenticationError.js';
+import { NotFoundError } from '../../../errors/NotFoundError.js';
+import { BadRequestError } from '../../../errors/BadRequestError.js';
+import { ConflictError } from '../../../errors/ConflictError.js';
+import { logger } from '../../../utils/logger.js';
+import { getBrevoClient } from '../../../config/brevo.js';
+import { emitAdminEvent } from '../../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../../constants/socketEvents.js';
 
 const sendOTPEmail = async (email, otp, purpose) => {
   const brevoClient = getBrevoClient();
   if (!brevoClient) {
-    logger.warn("Brevo not configured, OTP email not sent", { email });
+    logger.warn('Brevo not configured, OTP email not sent', { email });
     return;
   }
 
   const subject =
-    purpose === "signup"
-      ? "Verify Your Email - Hoterstellar"
-      : "Sign In to Hoterstellar";
+    purpose === 'signup'
+      ? 'Verify Your Email - Hoterstellar'
+      : 'Sign In to Hoterstellar';
   const title =
-    purpose === "signup" ? "Welcome to Hoterstellar!" : "Sign In Verification";
+    purpose === 'signup' ? 'Welcome to Hoterstellar!' : 'Sign In Verification';
 
   try {
     await brevoClient.sendEmail({
@@ -44,7 +44,7 @@ const sendOTPEmail = async (email, otp, purpose) => {
       `,
     });
   } catch (error) {
-    logger.error("Failed to send OTP email", { error: error.message });
+    logger.error('Failed to send OTP email', { error: error.message });
   }
 };
 
@@ -53,19 +53,19 @@ export const userSignup = async (userData) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ConflictError("Email already registered");
+    throw new ConflictError('Email already registered');
   }
 
   const existingChallenge = await UserAuthChallenge.findOne({
     email,
-    purpose: "signup",
+    purpose: 'signup',
     consumedAt: null,
     expiresAt: { $gt: new Date() },
   });
 
   if (existingChallenge) {
     throw new BadRequestError(
-      "Verification code already sent. Please check your email.",
+      'Verification code already sent. Please check your email.',
     );
   }
 
@@ -75,14 +75,14 @@ export const userSignup = async (userData) => {
   await UserAuthChallenge.create({
     email,
     codeHash,
-    purpose: "signup",
+    purpose: 'signup',
     pendingUserData: userData,
     expiresAt: new Date(Date.now() + SECURITY.OTP_EXPIRY_MINUTES * 60 * 1000),
   });
 
-  await sendOTPEmail(email, otp, "signup");
+  await sendOTPEmail(email, otp, 'signup');
 
-  logger.info("User signup OTP sent", { email });
+  logger.info('User signup OTP sent', { email });
 
   return true;
 };
@@ -90,24 +90,24 @@ export const userSignup = async (userData) => {
 export const userSignupVerify = async (email, code, deviceInfo) => {
   const challenge = await UserAuthChallenge.findOne({
     email,
-    purpose: "signup",
+    purpose: 'signup',
     consumedAt: null,
     expiresAt: { $gt: new Date() },
-  }).select("+codeHash");
+  }).select('+codeHash');
 
   if (!challenge) {
-    throw new BadRequestError("Verification code expired or not found");
+    throw new BadRequestError('Verification code expired or not found');
   }
 
   if (challenge.hasExceededAttempts()) {
-    throw new BadRequestError("Too many attempts. Please request a new code.");
+    throw new BadRequestError('Too many attempts. Please request a new code.');
   }
 
   const codeHash = hashToken(code);
   if (codeHash !== challenge.codeHash) {
     challenge.attempts += 1;
     await challenge.save();
-    throw new AuthenticationError("Invalid verification code");
+    throw new AuthenticationError('Invalid verification code');
   }
 
   challenge.consumedAt = new Date();
@@ -119,7 +119,7 @@ export const userSignupVerify = async (email, code, deviceInfo) => {
   const payload = {
     sub: user._id.toString(),
     userId: user._id.toString(),
-    type: "user",
+    type: 'user',
   };
 
   const { accessToken, refreshToken, refreshTokenHash } = generateTokenPair(
@@ -131,14 +131,14 @@ export const userSignupVerify = async (email, code, deviceInfo) => {
   await UserSession.create({
     userId: user._id,
     refreshTokenHash,
-    deviceInfo: deviceInfo || "Unknown device",
+    deviceInfo: deviceInfo || 'Unknown device',
     issuedAt: new Date(),
     expiresAt: new Date(
       Date.now() + SECURITY.REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     ),
   });
 
-  logger.info("User signed up", { userId: user._id, email: user.email });
+  logger.info('User signed up', { userId: user._id, email: user.email });
 
   emitAdminEvent(SOCKET_EVENTS.USER_NEW, {
     userId: user._id,
@@ -162,14 +162,14 @@ export const userSignin = async (email) => {
 
   const existingChallenge = await UserAuthChallenge.findOne({
     email,
-    purpose: "signin",
+    purpose: 'signin',
     consumedAt: null,
     expiresAt: { $gt: new Date() },
   });
 
   if (existingChallenge) {
     throw new BadRequestError(
-      "Verification code already sent. Please check your email.",
+      'Verification code already sent. Please check your email.',
     );
   }
 
@@ -179,13 +179,13 @@ export const userSignin = async (email) => {
   await UserAuthChallenge.create({
     email,
     codeHash,
-    purpose: "signin",
+    purpose: 'signin',
     expiresAt: new Date(Date.now() + SECURITY.OTP_EXPIRY_MINUTES * 60 * 1000),
   });
 
-  await sendOTPEmail(email, otp, "signin");
+  await sendOTPEmail(email, otp, 'signin');
 
-  logger.info("User signin OTP sent", { email });
+  logger.info('User signin OTP sent', { email });
 
   return true;
 };
@@ -193,24 +193,24 @@ export const userSignin = async (email) => {
 export const userSigninVerify = async (email, code, deviceInfo) => {
   const challenge = await UserAuthChallenge.findOne({
     email,
-    purpose: "signin",
+    purpose: 'signin',
     consumedAt: null,
     expiresAt: { $gt: new Date() },
-  }).select("+codeHash");
+  }).select('+codeHash');
 
   if (!challenge) {
-    throw new BadRequestError("Verification code expired or not found");
+    throw new BadRequestError('Verification code expired or not found');
   }
 
   if (challenge.hasExceededAttempts()) {
-    throw new BadRequestError("Too many attempts. Please request a new code.");
+    throw new BadRequestError('Too many attempts. Please request a new code.');
   }
 
   const codeHash = hashToken(code);
   if (codeHash !== challenge.codeHash) {
     challenge.attempts += 1;
     await challenge.save();
-    throw new AuthenticationError("Invalid verification code");
+    throw new AuthenticationError('Invalid verification code');
   }
 
   challenge.consumedAt = new Date();
@@ -218,13 +218,13 @@ export const userSigninVerify = async (email, code, deviceInfo) => {
 
   const user = await User.findOne({ email });
   if (!user || !user.isActive || user.isDeleted()) {
-    throw new AuthenticationError("Account not found or deactivated");
+    throw new AuthenticationError('Account not found or deactivated');
   }
 
   const payload = {
     sub: user._id.toString(),
     userId: user._id.toString(),
-    type: "user",
+    type: 'user',
   };
 
   const { accessToken, refreshToken, refreshTokenHash } = generateTokenPair(
@@ -236,14 +236,14 @@ export const userSigninVerify = async (email, code, deviceInfo) => {
   await UserSession.create({
     userId: user._id,
     refreshTokenHash,
-    deviceInfo: deviceInfo || "Unknown device",
+    deviceInfo: deviceInfo || 'Unknown device',
     issuedAt: new Date(),
     expiresAt: new Date(
       Date.now() + SECURITY.REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     ),
   });
 
-  logger.info("User signed in", { userId: user._id, email: user.email });
+  logger.info('User signed in', { userId: user._id, email: user.email });
 
   return {
     accessToken,
@@ -255,17 +255,17 @@ export const userSigninVerify = async (email, code, deviceInfo) => {
 export const userRefresh = async (refreshToken, deviceInfo) => {
   const refreshTokenHash = hashToken(refreshToken);
   const session = await UserSession.findOne({ refreshTokenHash }).select(
-    "+refreshTokenHash",
+    '+refreshTokenHash',
   );
 
   if (!session || !session.isActive()) {
-    throw new AuthenticationError("Invalid refresh token");
+    throw new AuthenticationError('Invalid refresh token');
   }
 
   const user = await User.findById(session.userId);
 
   if (!user || !user.isActive || user.isDeleted()) {
-    throw new AuthenticationError("Account is deactivated");
+    throw new AuthenticationError('Account is deactivated');
   }
 
   session.revokedAt = new Date();
@@ -274,7 +274,7 @@ export const userRefresh = async (refreshToken, deviceInfo) => {
   const payload = {
     sub: user._id.toString(),
     userId: user._id.toString(),
-    type: "user",
+    type: 'user',
   };
 
   const {
@@ -290,7 +290,7 @@ export const userRefresh = async (refreshToken, deviceInfo) => {
   const newSession = await UserSession.create({
     userId: user._id,
     refreshTokenHash: newRefreshTokenHash,
-    deviceInfo: deviceInfo || "Unknown device",
+    deviceInfo: deviceInfo || 'Unknown device',
     issuedAt: new Date(),
     expiresAt: new Date(
       Date.now() + SECURITY.REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
@@ -327,7 +327,7 @@ export const getUserProfile = async (userId) => {
   const user = await User.findById(userId);
 
   if (!user || user.isDeleted()) {
-    throw new NotFoundError("User not found");
+    throw new NotFoundError('User not found');
   }
 
   return user.toSafeObject();
@@ -337,13 +337,13 @@ export const updateUserProfile = async (userId, updateData) => {
   const user = await User.findById(userId);
 
   if (!user || user.isDeleted()) {
-    throw new NotFoundError("User not found");
+    throw new NotFoundError('User not found');
   }
 
   Object.assign(user, updateData);
   await user.save();
 
-  logger.info("User profile updated", { userId });
+  logger.info('User profile updated', { userId });
 
   return user.toSafeObject();
 };

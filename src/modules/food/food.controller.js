@@ -4,7 +4,7 @@ import {
   getFoodById,
   updateFood,
   deleteFood,
-} from "./food.service.js";
+} from './food.service.js';
 
 export const createFoodController = async (req, res, next) => {
   try {
@@ -16,8 +16,8 @@ export const createFoodController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Food created",
+      code: 'CREATED',
+      message: 'Food created',
       data: { food },
     });
   } catch (error) {
@@ -32,8 +32,8 @@ export const listFoodsController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Foods retrieved",
+      code: 'OK',
+      message: 'Foods retrieved',
       data: result,
     });
   } catch (error) {
@@ -50,8 +50,8 @@ export const getFoodController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Food retrieved",
+      code: 'OK',
+      message: 'Food retrieved',
       data: { food },
     });
   } catch (error) {
@@ -70,8 +70,8 @@ export const updateFoodController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Food updated",
+      code: 'OK',
+      message: 'Food updated',
       data: { food },
     });
   } catch (error) {
@@ -88,8 +88,8 @@ export const deleteFoodController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Food deleted",
+      code: 'OK',
+      message: 'Food deleted',
     });
   } catch (error) {
     next(error);

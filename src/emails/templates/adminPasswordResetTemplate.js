@@ -1,9 +1,9 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const adminPasswordResetTemplate = ({
   name,
   resetUrl,
-  expiryTime = "1 hour",
+  expiryTime = '1 hour',
 }) => {
   const content = `
     <p class="content-text">Dear ${name},</p>
@@ -33,8 +33,8 @@ export const adminPasswordResetTemplate = ({
   `;
 
   return baseLayout({
-    title: "Password Reset Request",
-    preheader: "Reset your admin password",
+    title: 'Password Reset Request',
+    preheader: 'Reset your admin password',
     content,
   });
 };

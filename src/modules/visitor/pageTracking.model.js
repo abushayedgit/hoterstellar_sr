@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const pageTrackingSchema = new mongoose.Schema(
   {
@@ -10,17 +10,17 @@ const pageTrackingSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       default: null,
       index: true,
     },
     ip: {
       type: String,
-      default: "",
+      default: '',
     },
     referrer: {
       type: String,
-      default: "",
+      default: '',
     },
     page: {
       type: String,
@@ -28,7 +28,7 @@ const pageTrackingSchema = new mongoose.Schema(
     },
     userAgent: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   baseSchemaOptions,
@@ -38,4 +38,4 @@ pageTrackingSchema.index({ page: 1, createdAt: -1 });
 pageTrackingSchema.index({ guestId: 1, createdAt: -1 });
 pageTrackingSchema.index({ userId: 1, createdAt: -1 });
 
-export const PageTracking = mongoose.model("PageTracking", pageTrackingSchema);
+export const PageTracking = mongoose.model('PageTracking', pageTrackingSchema);

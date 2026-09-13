@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../models/base.model.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../models/base.model.js';
 
 const carouselImageSchema = new mongoose.Schema(
   {
@@ -32,12 +32,12 @@ const carouselItemSchema = new mongoose.Schema(
     btnColor: {
       type: String,
       required: true,
-      default: "#FFFFFF",
+      default: '#FFFFFF',
     },
     bgGlassEffectColor: {
       type: String,
       required: true,
-      default: "rgba(0,0,0,0.35)",
+      default: 'rgba(0,0,0,0.35)',
     },
     CTALINK: {
       type: String,
@@ -88,12 +88,12 @@ const billboardSchema = new mongoose.Schema(
         validator: function (items) {
           return items.length <= 5;
         },
-        message: "Maximum 5 carousel items allowed",
+        message: 'Maximum 5 carousel items allowed',
       },
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: 'Admin',
       default: null,
     },
   },
@@ -106,9 +106,9 @@ billboardSchema.statics.getSingleton = async function () {
   if (!billboard) {
     billboard = await this.create({
       billBoardImg: {
-        image: "",
-        imgId: "billboard-default",
-        altText: "Hoterstellar",
+        image: '',
+        imgId: 'billboard-default',
+        altText: 'Hoterstellar',
       },
       Carousels: [],
     });
@@ -117,4 +117,4 @@ billboardSchema.statics.getSingleton = async function () {
   return billboard;
 };
 
-export const Billboard = mongoose.model("Billboard", billboardSchema);
+export const Billboard = mongoose.model('Billboard', billboardSchema);

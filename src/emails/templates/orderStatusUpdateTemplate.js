@@ -1,24 +1,24 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const orderStatusUpdateTemplate = ({
   orderNumber,
   customerName,
   status,
-  note = "",
+  note = '',
 }) => {
   const statusColors = {
-    pending: "#1B3A5C",
-    confirmed: "#1B4332",
-    preparing: "#C9A96E",
-    ready: "#1B4332",
-    out_for_delivery: "#1B3A5C",
-    delivered: "#1B4332",
-    completed: "#1B4332",
-    cancelled: "#8B0000",
+    pending: '#1B3A5C',
+    confirmed: '#1B4332',
+    preparing: '#C9A96E',
+    ready: '#1B4332',
+    out_for_delivery: '#1B3A5C',
+    delivered: '#1B4332',
+    completed: '#1B4332',
+    cancelled: '#8B0000',
   };
 
-  const statusColor = statusColors[status] || "#1B4332";
-  const formattedStatus = status.replace(/_/g, " ").toUpperCase();
+  const statusColor = statusColors[status] || '#1B4332';
+  const formattedStatus = status.replace(/_/g, ' ').toUpperCase();
 
   const content = `
     <p class="content-text">Dear ${customerName},</p>
@@ -32,7 +32,7 @@ export const orderStatusUpdateTemplate = ({
       <div style="display: inline-block; background: ${statusColor}; color: #FFFFFF; padding: 10px 30px; border-radius: 20px; font-size: 14px; font-weight: 600; letter-spacing: 2px; margin: 10px 0;">
         ${formattedStatus}
       </div>
-      ${note ? `<p style="font-size: 13px; color: #888; margin-top: 15px;">Note: ${note}</p>` : ""}
+      ${note ? `<p style="font-size: 13px; color: #888; margin-top: 15px;">Note: ${note}</p>` : ''}
     </div>
     
     <p class="content-text">
@@ -41,7 +41,7 @@ export const orderStatusUpdateTemplate = ({
   `;
 
   return baseLayout({
-    title: "Order Status Update",
+    title: 'Order Status Update',
     preheader: `Order ${orderNumber} is now ${formattedStatus}`,
     content,
   });

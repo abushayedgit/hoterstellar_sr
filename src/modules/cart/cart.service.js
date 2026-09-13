@@ -1,9 +1,9 @@
-import { Cart } from "./cart.model.js";
-import { Food } from "../food/food.model.js";
-import { cartRepository } from "./cart.repository.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { logger } from "../../utils/logger.js";
+import { Cart } from './cart.model.js';
+import { Food } from '../food/food.model.js';
+import { cartRepository } from './cart.repository.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { logger } from '../../utils/logger.js';
 
 const MAX_CART_QTY_PER_ITEM = 20;
 
@@ -20,7 +20,7 @@ export const getCart = async (userId) => {
     });
   }
 
-  return cart.populate("items.food", "name price discount images isAvailable");
+  return cart.populate('items.food', 'name price discount images isAvailable');
 };
 
 export const addToCart = async (
@@ -30,11 +30,11 @@ export const addToCart = async (
   const food = await Food.findById(foodId);
 
   if (!food) {
-    throw new NotFoundError("Food not found");
+    throw new NotFoundError('Food not found');
   }
 
   if (!food.isAvailable) {
-    throw new BadRequestError("Food is not available");
+    throw new BadRequestError('Food is not available');
   }
 
   let cart = await cartRepository.findByUserId(userId);
@@ -78,7 +78,7 @@ export const addToCart = async (
       unitPrice: food.price,
       discount: food.discount || 0,
       quantity,
-      specialInstructions: specialInstructions || "",
+      specialInstructions: specialInstructions || '',
       lineTotal: food.price * quantity,
     });
   }
@@ -86,9 +86,9 @@ export const addToCart = async (
   cart.recalculateTotals();
   await cart.save();
 
-  logger.info("Item added to cart", { userId, foodId, quantity });
+  logger.info('Item added to cart', { userId, foodId, quantity });
 
-  return cart.populate("items.food", "name price discount images isAvailable");
+  return cart.populate('items.food', 'name price discount images isAvailable');
 };
 
 export const updateCartItem = async (
@@ -99,18 +99,18 @@ export const updateCartItem = async (
   const cart = await cartRepository.findByUserId(userId);
 
   if (!cart) {
-    throw new NotFoundError("Cart not found");
+    throw new NotFoundError('Cart not found');
   }
 
   const item = cart.items.find((item) => item.food.toString() === foodId);
 
   if (!item) {
-    throw new NotFoundError("Item not found in cart");
+    throw new NotFoundError('Item not found in cart');
   }
 
   const food = await Food.findById(foodId);
   if (!food || !food.isAvailable) {
-    throw new BadRequestError("Food is not available");
+    throw new BadRequestError('Food is not available');
   }
 
   item.quantity = quantity;
@@ -126,16 +126,16 @@ export const updateCartItem = async (
   cart.recalculateTotals();
   await cart.save();
 
-  logger.info("Cart item updated", { userId, foodId, quantity });
+  logger.info('Cart item updated', { userId, foodId, quantity });
 
-  return cart.populate("items.food", "name price discount images isAvailable");
+  return cart.populate('items.food', 'name price discount images isAvailable');
 };
 
 export const removeCartItem = async (userId, foodId) => {
   const cart = await cartRepository.findByUserId(userId);
 
   if (!cart) {
-    throw new NotFoundError("Cart not found");
+    throw new NotFoundError('Cart not found');
   }
 
   const itemIndex = cart.items.findIndex(
@@ -143,16 +143,16 @@ export const removeCartItem = async (userId, foodId) => {
   );
 
   if (itemIndex === -1) {
-    throw new NotFoundError("Item not found in cart");
+    throw new NotFoundError('Item not found in cart');
   }
 
   cart.items.splice(itemIndex, 1);
   cart.recalculateTotals();
   await cart.save();
 
-  logger.info("Cart item removed", { userId, foodId });
+  logger.info('Cart item removed', { userId, foodId });
 
-  return cart.populate("items.food", "name price discount images isAvailable");
+  return cart.populate('items.food', 'name price discount images isAvailable');
 };
 
 export const clearCart = async (userId) => {
@@ -166,7 +166,7 @@ export const clearCart = async (userId) => {
   cart.recalculateTotals();
   await cart.save();
 
-  logger.info("Cart cleared", { userId });
+  logger.info('Cart cleared', { userId });
 
   return true;
 };
@@ -195,7 +195,7 @@ export const mergeGuestCart = async (userId, guestItems) => {
     if (!food || !food.isAvailable) {
       skippedItems.push({
         foodId,
-        reason: "Food not available",
+        reason: 'Food not available',
       });
       continue;
     }
@@ -213,7 +213,7 @@ export const mergeGuestCart = async (userId, guestItems) => {
           foodId,
           originalQuantity: quantity,
           adjustedQuantity: MAX_CART_QTY_PER_ITEM - existingItem.quantity,
-          reason: "Maximum quantity reached",
+          reason: 'Maximum quantity reached',
         });
       } else {
         existingItem.quantity = newQuantity;
@@ -231,7 +231,7 @@ export const mergeGuestCart = async (userId, guestItems) => {
         unitPrice: food.price,
         discount: food.discount || 0,
         quantity: addQuantity,
-        specialInstructions: "",
+        specialInstructions: '',
         lineTotal: food.price * addQuantity,
       });
 
@@ -240,7 +240,7 @@ export const mergeGuestCart = async (userId, guestItems) => {
           foodId,
           originalQuantity: quantity,
           adjustedQuantity: addQuantity,
-          reason: "Maximum quantity reached",
+          reason: 'Maximum quantity reached',
         });
       }
     }
@@ -249,11 +249,11 @@ export const mergeGuestCart = async (userId, guestItems) => {
   cart.recalculateTotals();
   await cart.save();
 
-  logger.info("Guest cart merged", { userId, itemCount: guestItems.length });
+  logger.info('Guest cart merged', { userId, itemCount: guestItems.length });
 
   const populatedCart = await cart.populate(
-    "items.food",
-    "name price discount images isAvailable",
+    'items.food',
+    'name price discount images isAvailable',
   );
 
   return {

@@ -1,4 +1,4 @@
-import { Billboard } from "./billboard.model.js";
+import { Billboard } from './billboard.model.js';
 
 export const billboardRepository = {
   getSingleton: () => Billboard.getSingleton(),

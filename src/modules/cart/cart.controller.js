@@ -5,7 +5,7 @@ import {
   removeCartItem,
   clearCart,
   mergeGuestCart,
-} from "./cart.service.js";
+} from './cart.service.js';
 
 export const getCartController = async (req, res, next) => {
   try {
@@ -16,8 +16,8 @@ export const getCartController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Cart retrieved",
+      code: 'OK',
+      message: 'Cart retrieved',
       data: { cart },
     });
   } catch (error) {
@@ -35,8 +35,8 @@ export const addToCartController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Item added to cart",
+      code: 'OK',
+      message: 'Item added to cart',
       data: { cart },
     });
   } catch (error) {
@@ -55,8 +55,8 @@ export const updateCartItemController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Cart item updated",
+      code: 'OK',
+      message: 'Cart item updated',
       data: { cart },
     });
   } catch (error) {
@@ -74,8 +74,8 @@ export const removeCartItemController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Item removed from cart",
+      code: 'OK',
+      message: 'Item removed from cart',
       data: { cart },
     });
   } catch (error) {
@@ -92,8 +92,8 @@ export const clearCartController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Cart cleared",
+      code: 'OK',
+      message: 'Cart cleared',
     });
   } catch (error) {
     next(error);
@@ -110,8 +110,8 @@ export const mergeGuestCartController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Cart merged",
+      code: 'OK',
+      message: 'Cart merged',
       data: result,
     });
   } catch (error) {

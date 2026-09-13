@@ -1,13 +1,13 @@
-import { billboardRepository } from "./billboard.repository.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { logger } from "../../utils/logger.js";
-import { sanitizeUrl } from "../../utils/sanitizeHtml.js";
-import { getCache, setCache, deleteCache } from "../../utils/cache.js";
-import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
+import { billboardRepository } from './billboard.repository.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { logger } from '../../utils/logger.js';
+import { sanitizeUrl } from '../../utils/sanitizeHtml.js';
+import { getCache, setCache, deleteCache } from '../../utils/cache.js';
+import { uploadToImageKit, deleteFromImageKit } from '../../config/storage.js';
 
 const MAX_CAROUSELS = 5;
-const BILLBOARD_CACHE_KEY = "cache:billboard:public";
+const BILLBOARD_CACHE_KEY = 'cache:billboard:public';
 
 const validateCarouselCount = (carousels) => {
   if (carousels.length > MAX_CAROUSELS) {
@@ -67,7 +67,7 @@ export const updateBillboard = async (updateData, adminId) => {
 
   await invalidateBillboardCache();
 
-  logger.info("Billboard updated", {
+  logger.info('Billboard updated', {
     adminId,
     carouselCount: sanitizedCarousels.length,
   });
@@ -89,7 +89,7 @@ export const addCarouselItem = async (carouselItem, imageFile, adminId) => {
   const result = await uploadToImageKit(
     imageFile.buffer,
     fileName,
-    "billboard/carousels",
+    'billboard/carousels',
   );
   carouselItem.img = {
     url: result.url,
@@ -105,7 +105,7 @@ export const addCarouselItem = async (carouselItem, imageFile, adminId) => {
 
   await invalidateBillboardCache();
 
-  logger.info("Carousel item added", { adminId });
+  logger.info('Carousel item added', { adminId });
 
   return billboard;
 };
@@ -123,7 +123,7 @@ export const updateCarouselItem = async (
   );
 
   if (carouselIndex === -1) {
-    throw new NotFoundError("Carousel item not found");
+    throw new NotFoundError('Carousel item not found');
   }
 
   const oldImageId = billboard.Carousels[carouselIndex].img.imgId;
@@ -134,7 +134,7 @@ export const updateCarouselItem = async (
     const result = await uploadToImageKit(
       imageFile.buffer,
       fileName,
-      "billboard/carousels",
+      'billboard/carousels',
     );
     updateData.img = {
       url: result.url,
@@ -162,7 +162,7 @@ export const updateCarouselItem = async (
 
   await invalidateBillboardCache();
 
-  logger.info("Carousel item updated", { adminId, imgId });
+  logger.info('Carousel item updated', { adminId, imgId });
 
   return billboard;
 };
@@ -175,7 +175,7 @@ export const removeCarouselItem = async (imgId, adminId) => {
   );
 
   if (carouselIndex === -1) {
-    throw new NotFoundError("Carousel item not found");
+    throw new NotFoundError('Carousel item not found');
   }
 
   const oldImageId = billboard.Carousels[carouselIndex].img.imgId;
@@ -194,7 +194,7 @@ export const removeCarouselItem = async (imgId, adminId) => {
 
   await invalidateBillboardCache();
 
-  logger.info("Carousel item removed", { adminId, imgId });
+  logger.info('Carousel item removed', { adminId, imgId });
 
   return billboard;
 };
@@ -219,7 +219,7 @@ export const reorderCarousels = async (carouselsOrder, adminId) => {
 
   await invalidateBillboardCache();
 
-  logger.info("Carousels reordered", { adminId });
+  logger.info('Carousels reordered', { adminId });
 
   return billboard;
 };
@@ -234,7 +234,7 @@ export const updatePopupImage = async (popupImageData, imageFile, adminId) => {
   const result = await uploadToImageKit(
     imageFile.buffer,
     fileName,
-    "billboard/popup",
+    'billboard/popup',
   );
 
   billboard.billBoardImg = {
@@ -246,13 +246,13 @@ export const updatePopupImage = async (popupImageData, imageFile, adminId) => {
   await billboard.save();
 
   // Delete old image after successful DB update
-  if (oldImageId && oldImageId !== "billboard-default") {
+  if (oldImageId && oldImageId !== 'billboard-default') {
     await deleteFromImageKit(oldImageId);
   }
 
   await invalidateBillboardCache();
 
-  logger.info("Popup image updated", {
+  logger.info('Popup image updated', {
     adminId,
     newImgId: result.fileId,
   });

@@ -1,4 +1,4 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const adminWelcomeTemplate = ({
   name,
@@ -40,8 +40,8 @@ export const adminWelcomeTemplate = ({
   `;
 
   return baseLayout({
-    title: "Welcome to the Team",
-    preheader: "Your admin account has been created",
+    title: 'Welcome to the Team',
+    preheader: 'Your admin account has been created',
     content,
   });
 };

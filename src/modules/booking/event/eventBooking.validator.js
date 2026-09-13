@@ -1,25 +1,25 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createEventBookingSchema = z.object({
-  customerName: z.string().min(2, "Name is required"),
-  phone: z.string().min(10, "Valid phone is required"),
-  email: z.string().email("Valid email is required").optional().default(""),
+  customerName: z.string().min(2, 'Name is required'),
+  phone: z.string().min(10, 'Valid phone is required'),
+  email: z.string().email('Valid email is required').optional().default(''),
   eventType: z.enum([
-    "wedding",
-    "corporate",
-    "birthday",
-    "anniversary",
-    "conference",
-    "other",
+    'wedding',
+    'corporate',
+    'birthday',
+    'anniversary',
+    'conference',
+    'other',
   ]),
-  eventDate: z.string().min(1, "Event date is required"),
+  eventDate: z.string().min(1, 'Event date is required'),
   guestCount: z.number().int().min(1).max(500),
-  eventDetails: z.string().max(2000).optional().default(""),
-  specialRequirements: z.string().max(2000).optional().default(""),
+  eventDetails: z.string().max(2000).optional().default(''),
+  specialRequirements: z.string().max(2000).optional().default(''),
   budgetRange: z
-    .enum(["economy", "standard", "premium", "luxury", ""])
+    .enum(['economy', 'standard', 'premium', 'luxury', ''])
     .optional()
-    .default(""),
+    .default(''),
 });
 
 export const updateEventBookingSchema = z.object({
@@ -28,12 +28,12 @@ export const updateEventBookingSchema = z.object({
   email: z.string().email().optional(),
   eventType: z
     .enum([
-      "wedding",
-      "corporate",
-      "birthday",
-      "anniversary",
-      "conference",
-      "other",
+      'wedding',
+      'corporate',
+      'birthday',
+      'anniversary',
+      'conference',
+      'other',
     ])
     .optional(),
   eventDate: z.string().optional(),
@@ -41,27 +41,27 @@ export const updateEventBookingSchema = z.object({
   eventDetails: z.string().max(2000).optional(),
   specialRequirements: z.string().max(2000).optional(),
   budgetRange: z
-    .enum(["economy", "standard", "premium", "luxury", ""])
+    .enum(['economy', 'standard', 'premium', 'luxury', ''])
     .optional(),
 });
 
 export const updateEventBookingStatusSchema = z.object({
   status: z.enum([
-    "pending",
-    "under_review",
-    "quotation_sent",
-    "confirmed",
-    "deposit_paid",
-    "completed",
-    "cancelled",
+    'pending',
+    'under_review',
+    'quotation_sent',
+    'confirmed',
+    'deposit_paid',
+    'completed',
+    'cancelled',
   ]),
   quotationAmount: z.number().min(0).optional(),
   depositAmount: z.number().min(0).optional(),
-  note: z.string().max(500).optional().default(""),
+  note: z.string().max(500).optional().default(''),
 });
 
 export const cancelEventBookingSchema = z.object({
-  reason: z.string().min(5, "Cancellation reason is required").max(500),
+  reason: z.string().min(5, 'Cancellation reason is required').max(500),
 });
 
 export const eventBookingQuerySchema = z.object({
@@ -69,28 +69,28 @@ export const eventBookingQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(10),
   status: z
     .enum([
-      "pending",
-      "under_review",
-      "quotation_sent",
-      "confirmed",
-      "deposit_paid",
-      "completed",
-      "cancelled",
+      'pending',
+      'under_review',
+      'quotation_sent',
+      'confirmed',
+      'deposit_paid',
+      'completed',
+      'cancelled',
     ])
     .optional(),
   eventType: z
     .enum([
-      "wedding",
-      "corporate",
-      "birthday",
-      "anniversary",
-      "conference",
-      "other",
+      'wedding',
+      'corporate',
+      'birthday',
+      'anniversary',
+      'conference',
+      'other',
     ])
     .optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
   search: z.string().optional(),
-  sortBy: z.enum(["createdAt", "eventDate", "guestCount"]).default("eventDate"),
-  sortOrder: z.enum(["asc", "desc"]).default("asc"),
+  sortBy: z.enum(['createdAt', 'eventDate', 'guestCount']).default('eventDate'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
 });

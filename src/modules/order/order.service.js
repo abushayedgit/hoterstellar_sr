@@ -1,23 +1,23 @@
-import { Order } from "./order.model.js";
-import { Cart } from "../cart/cart.model.js";
-import { Food } from "../food/food.model.js";
-import { Counter } from "../../models/counter.model.js";
-import { orderRepository } from "./order.repository.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { ConflictError } from "../../errors/ConflictError.js";
-import { logger } from "../../utils/logger.js";
-import { getBrevoClient } from "../../config/brevo.js";
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { Order } from './order.model.js';
+import { Cart } from '../cart/cart.model.js';
+import { Food } from '../food/food.model.js';
+import { Counter } from '../../models/counter.model.js';
+import { orderRepository } from './order.repository.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { ConflictError } from '../../errors/ConflictError.js';
+import { logger } from '../../utils/logger.js';
+import { getBrevoClient } from '../../config/brevo.js';
+import { emitAdminEvent } from '../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../constants/socketEvents.js';
 
 const VALID_TRANSITIONS = {
-  pending: ["confirmed", "cancelled"],
-  confirmed: ["preparing", "cancelled"],
-  preparing: ["ready", "cancelled"],
-  ready: ["out_for_delivery", "delivered", "completed", "cancelled"],
-  out_for_delivery: ["delivered", "completed"],
-  delivered: ["completed"],
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['preparing', 'cancelled'],
+  preparing: ['ready', 'cancelled'],
+  ready: ['out_for_delivery', 'delivered', 'completed', 'cancelled'],
+  out_for_delivery: ['delivered', 'completed'],
+  delivered: ['completed'],
   completed: [],
   cancelled: [],
 };
@@ -26,13 +26,13 @@ const TAX_RATE = 0.05; // 5% tax
 
 const generateOrderNumber = async () => {
   const seq = await Counter.findOneAndUpdate(
-    { key: "orderNumber" },
+    { key: 'orderNumber' },
     { $inc: { seq: 1 } },
     { new: true, upsert: true },
   );
 
   const year = new Date().getFullYear();
-  const paddedSeq = String(seq.seq).padStart(6, "0");
+  const paddedSeq = String(seq.seq).padStart(6, '0');
   return `ORD-${year}-${paddedSeq}`;
 };
 
@@ -52,13 +52,13 @@ const sendOrderConfirmationEmail = async (order) => {
         <p><strong>Total Amount:</strong> ৳${order.totalAmount}</p>
         <h3>Items:</h3>
         <ul>
-          ${order.items.map((item) => `<li>${item.name} x ${item.quantity} = ৳${item.lineTotal}</li>`).join("")}
+          ${order.items.map((item) => `<li>${item.name} x ${item.quantity} = ৳${item.lineTotal}</li>`).join('')}
         </ul>
         <p>We will notify you when your order is ready.</p>
       `,
     });
   } catch (error) {
-    logger.error("Failed to send order confirmation email", {
+    logger.error('Failed to send order confirmation email', {
       error: error.message,
     });
   }
@@ -69,7 +69,7 @@ export const createOrder = async (userId, orderData) => {
   const cart = await Cart.findOne({ userId });
 
   if (!cart || cart.items.length === 0) {
-    throw new BadRequestError("Cart is empty");
+    throw new BadRequestError('Cart is empty');
   }
 
   // Verify all foods are still available and get current prices
@@ -106,7 +106,7 @@ export const createOrder = async (userId, orderData) => {
       discount,
       quantity,
       lineTotal,
-      specialInstructions: cartItem.specialInstructions || "",
+      specialInstructions: cartItem.specialInstructions || '',
     });
 
     subtotal += lineTotal;
@@ -129,15 +129,15 @@ export const createOrder = async (userId, orderData) => {
     totalAmount,
     customerName: orderData.customerName,
     phone: orderData.phone,
-    email: orderData.email || "",
+    email: orderData.email || '',
     address: orderData.address || null,
     orderType: orderData.orderType,
     paymentMethod: orderData.paymentMethod,
-    specialInstructions: orderData.specialInstructions || "",
-    status: "pending",
+    specialInstructions: orderData.specialInstructions || '',
+    status: 'pending',
     statusHistory: [
       {
-        status: "pending",
+        status: 'pending',
         at: new Date(),
       },
     ],
@@ -151,7 +151,7 @@ export const createOrder = async (userId, orderData) => {
   // Send confirmation email
   await sendOrderConfirmationEmail(order);
 
-  logger.info("Order created", { orderId: order._id, orderNumber, userId });
+  logger.info('Order created', { orderId: order._id, orderNumber, userId });
 
   emitAdminEvent(SOCKET_EVENTS.ORDER_NEW, {
     orderId: order._id,
@@ -168,15 +168,15 @@ export const createOrder = async (userId, orderData) => {
 export const getOrderById = async (orderId, userId = null) => {
   const order = await orderRepository
     .findById(orderId)
-    .populate("userId", "name email phone");
+    .populate('userId', 'name email phone');
 
   if (!order) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
   // Check ownership if userId provided
   if (userId && order.userId._id.toString() !== userId.toString()) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
   return order;
@@ -215,8 +215,8 @@ export const listOrders = async (query) => {
     search,
     dateFrom,
     dateTo,
-    sortBy = "createdAt",
-    sortOrder = "desc",
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
   } = query;
 
   const filter = {};
@@ -227,9 +227,9 @@ export const listOrders = async (query) => {
 
   if (search) {
     filter.$or = [
-      { orderNumber: { $regex: search, $options: "i" } },
-      { customerName: { $regex: search, $options: "i" } },
-      { phone: { $regex: search, $options: "i" } },
+      { orderNumber: { $regex: search, $options: 'i' } },
+      { customerName: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } },
     ];
   }
 
@@ -239,7 +239,7 @@ export const listOrders = async (query) => {
     if (dateTo) filter.createdAt.$lte = new Date(dateTo);
   }
 
-  const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
   const [orders, total] = await orderRepository.findAll(filter, {
     page,
@@ -266,15 +266,15 @@ export const updateOrderStatus = async (
   orderId,
   newStatus,
   adminId,
-  note = "",
+  note = '',
 ) => {
   const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
-  if (order.status === "cancelled" || order.status === "completed") {
+  if (order.status === 'cancelled' || order.status === 'completed') {
     throw new ConflictError(`Order is already ${order.status}`);
   }
 
@@ -293,13 +293,13 @@ export const updateOrderStatus = async (
     note,
   );
 
-  if (newStatus === "confirmed") {
+  if (newStatus === 'confirmed') {
     emitAdminEvent(SOCKET_EVENTS.ORDER_CONFIRMED, {
       orderId,
       orderNumber: order.orderNumber,
       status: newStatus,
     });
-  } else if (newStatus === "cancelled") {
+  } else if (newStatus === 'cancelled') {
     emitAdminEvent(SOCKET_EVENTS.ORDER_CANCELLED, {
       orderId,
       orderNumber: order.orderNumber,
@@ -308,7 +308,7 @@ export const updateOrderStatus = async (
     });
   }
 
-  logger.info("Order status updated", {
+  logger.info('Order status updated', {
     orderId,
     from: order.status,
     to: newStatus,
@@ -318,19 +318,19 @@ export const updateOrderStatus = async (
   return updatedOrder;
 };
 
-export const cancelOrder = async (orderId, userId = null, reason = "") => {
+export const cancelOrder = async (orderId, userId = null, reason = '') => {
   const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
   // Check ownership for user cancellation
   if (userId && order.userId.toString() !== userId.toString()) {
-    throw new NotFoundError("Order not found");
+    throw new NotFoundError('Order not found');
   }
 
-  if (order.status !== "pending" && order.status !== "confirmed") {
+  if (order.status !== 'pending' && order.status !== 'confirmed') {
     throw new ConflictError(
       `Order cannot be cancelled from ${order.status} status`,
     );
@@ -338,7 +338,7 @@ export const cancelOrder = async (orderId, userId = null, reason = "") => {
 
   const updatedOrder = await orderRepository.updateStatus(
     orderId,
-    "cancelled",
+    'cancelled',
     null,
     reason,
   );
@@ -349,7 +349,7 @@ export const cancelOrder = async (orderId, userId = null, reason = "") => {
     reason,
   });
 
-  logger.info("Order cancelled", { orderId, userId, reason });
+  logger.info('Order cancelled', { orderId, userId, reason });
 
   return updatedOrder;
 };

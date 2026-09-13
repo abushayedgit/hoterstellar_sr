@@ -1,6 +1,6 @@
-import { ZodError } from "zod";
-import { validationResult } from "express-validator";
-import { ValidationError } from "../errors/ValidationError.js";
+import { ZodError } from 'zod';
+import { validationResult } from 'express-validator';
+import { ValidationError } from '../errors/ValidationError.js';
 
 /**
  * Validates request body against a Zod schema
@@ -16,10 +16,10 @@ export const validateBody = (schema) => {
     } catch (error) {
       if (error instanceof ZodError) {
         const details = error.errors.map((err) => ({
-          field: err.path.join("."),
+          field: err.path.join('.'),
           message: err.message,
         }));
-        next(new ValidationError("Validation failed", details));
+        next(new ValidationError('Validation failed', details));
       } else {
         next(error);
       }
@@ -41,10 +41,10 @@ export const validateQuery = (schema) => {
     } catch (error) {
       if (error instanceof ZodError) {
         const details = error.errors.map((err) => ({
-          field: err.path.join("."),
+          field: err.path.join('.'),
           message: err.message,
         }));
-        next(new ValidationError("Query validation failed", details));
+        next(new ValidationError('Query validation failed', details));
       } else {
         next(error);
       }
@@ -66,10 +66,10 @@ export const validateParams = (schema) => {
     } catch (error) {
       if (error instanceof ZodError) {
         const details = error.errors.map((err) => ({
-          field: err.path.join("."),
+          field: err.path.join('.'),
           message: err.message,
         }));
-        next(new ValidationError("Params validation failed", details));
+        next(new ValidationError('Params validation failed', details));
       } else {
         next(error);
       }
@@ -88,7 +88,7 @@ export const runExpressValidation = (req, res, next) => {
       field: err.path,
       message: err.msg,
     }));
-    return next(new ValidationError("Validation failed", details));
+    return next(new ValidationError('Validation failed', details));
   }
   next();
 };

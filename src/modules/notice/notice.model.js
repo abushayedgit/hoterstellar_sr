@@ -55,7 +55,7 @@ const noticeSchema = new mongoose.Schema(
       default: null,
     },
   },
-  baseSchemaOptions
+  baseSchemaOptions,
 );
 
 noticeSchema.index({ status: 1, publishedAt: -1 });

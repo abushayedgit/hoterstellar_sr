@@ -1,16 +1,16 @@
-import { Notice } from "./notice.model.js";
-import { noticeRepository } from "./notice.repository.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { ConflictError } from "../../errors/ConflictError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { logger } from "../../utils/logger.js";
-import { generateSlug } from "../../utils/slug.js";
-import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
-import { getCache, setCache, deleteCache } from "../../utils/cache.js";
-import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
+import { Notice } from './notice.model.js';
+import { noticeRepository } from './notice.repository.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { ConflictError } from '../../errors/ConflictError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { logger } from '../../utils/logger.js';
+import { generateSlug } from '../../utils/slug.js';
+import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
+import { getCache, setCache, deleteCache } from '../../utils/cache.js';
+import { uploadToImageKit, deleteFromImageKit } from '../../config/storage.js';
 
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { emitAdminEvent } from '../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../constants/socketEvents.js';
 
 let trackedNoticeCacheKeys = new Set();
 
@@ -27,20 +27,20 @@ export const createNotice = async (noticeData, imageFile, adminId) => {
   const existingNotice = await noticeRepository.findBySlug(generateSlug(title));
 
   if (existingNotice) {
-    throw new ConflictError("Notice with this title already exists");
+    throw new ConflictError('Notice with this title already exists');
   }
 
   const sanitizedContent = sanitizeHtml(noticeData.content);
 
-  let thumbnail = "";
-  let thumbnailId = "";
+  let thumbnail = '';
+  let thumbnailId = '';
 
   if (imageFile) {
     const fileName = `notice-${generateSlug(title)}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const result = await uploadToImageKit(
       imageFile.buffer,
       fileName,
-      "notices",
+      'notices',
     );
     thumbnail = result.url;
     thumbnailId = result.fileId;
@@ -53,12 +53,12 @@ export const createNotice = async (noticeData, imageFile, adminId) => {
     thumbnail,
     thumbnailId,
     authorAdminId: adminId,
-    publishedAt: noticeData.status === "published" ? new Date() : null,
+    publishedAt: noticeData.status === 'published' ? new Date() : null,
   });
 
   await invalidateAllNoticeCaches();
 
-  logger.info("Notice created", {
+  logger.info('Notice created', {
     noticeId: notice._id,
     adminId,
   });
@@ -80,8 +80,8 @@ export const listNotices = async (query) => {
     search,
     dateFrom,
     dateTo,
-    sortBy = "publishedAt",
-    sortOrder = "desc",
+    sortBy = 'publishedAt',
+    sortOrder = 'desc',
   } = query;
 
   const filter = {};
@@ -90,8 +90,8 @@ export const listNotices = async (query) => {
 
   if (search) {
     filter.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { cause: { $regex: search, $options: "i" } },
+      { title: { $regex: search, $options: 'i' } },
+      { cause: { $regex: search, $options: 'i' } },
     ];
   }
 
@@ -107,7 +107,7 @@ export const listNotices = async (query) => {
     }
   }
 
-  const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
   const [notices, total] = await noticeRepository.findAll(filter, {
     page,
@@ -141,7 +141,7 @@ export const listPublishedNotices = async (query) => {
   }
 
   const filter = {
-    status: "published",
+    status: 'published',
     publishedAt: { $ne: null },
   };
 
@@ -176,7 +176,7 @@ export const getNoticeById = async (noticeId) => {
   const notice = await noticeRepository.findById(noticeId);
 
   if (!notice) {
-    throw new NotFoundError("Notice not found");
+    throw new NotFoundError('Notice not found');
   }
 
   return notice;
@@ -192,8 +192,8 @@ export const getNoticeBySlug = async (slug) => {
 
   const notice = await noticeRepository.findBySlug(slug);
 
-  if (!notice || notice.status !== "published") {
-    throw new NotFoundError("Notice not found");
+  if (!notice || notice.status !== 'published') {
+    throw new NotFoundError('Notice not found');
   }
 
   const noticeData = notice.toJSON();
@@ -206,7 +206,7 @@ export const updateNotice = async (noticeId, updateData, imageFile) => {
   const notice = await noticeRepository.findById(noticeId);
 
   if (!notice) {
-    throw new NotFoundError("Notice not found");
+    throw new NotFoundError('Notice not found');
   }
 
   if (updateData.title && updateData.title !== notice.title) {
@@ -215,7 +215,7 @@ export const updateNotice = async (noticeId, updateData, imageFile) => {
     );
 
     if (existingNotice && existingNotice._id.toString() !== noticeId) {
-      throw new ConflictError("Notice with this title already exists");
+      throw new ConflictError('Notice with this title already exists');
     }
 
     updateData.slug = generateSlug(updateData.title);
@@ -225,11 +225,11 @@ export const updateNotice = async (noticeId, updateData, imageFile) => {
     updateData.content = sanitizeHtml(updateData.content);
   }
 
-  if (updateData.status === "published" && notice.status !== "published") {
+  if (updateData.status === 'published' && notice.status !== 'published') {
     updateData.publishedAt = new Date();
   }
 
-  if (updateData.status === "archived") {
+  if (updateData.status === 'archived') {
     updateData.publishedAt = null;
   }
 
@@ -237,11 +237,11 @@ export const updateNotice = async (noticeId, updateData, imageFile) => {
   if (imageFile) {
     const oldThumbnailId = notice.thumbnailId;
 
-    const fileName = `notice-${notice.slug || "update"}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const fileName = `notice-${notice.slug || 'update'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const result = await uploadToImageKit(
       imageFile.buffer,
       fileName,
-      "notices",
+      'notices',
     );
     updateData.thumbnail = result.url;
     updateData.thumbnailId = result.fileId;
@@ -257,7 +257,7 @@ export const updateNotice = async (noticeId, updateData, imageFile) => {
   await deleteCache(`cache:notices:${notice.slug}`);
   await invalidateAllNoticeCaches();
 
-  logger.info("Notice updated", { noticeId });
+  logger.info('Notice updated', { noticeId });
 
   return updatedNotice;
 };
@@ -266,7 +266,7 @@ export const deleteNotice = async (noticeId) => {
   const notice = await noticeRepository.findById(noticeId);
 
   if (!notice) {
-    throw new NotFoundError("Notice not found");
+    throw new NotFoundError('Notice not found');
   }
 
   // Delete thumbnail from ImageKit
@@ -279,7 +279,7 @@ export const deleteNotice = async (noticeId) => {
   await deleteCache(`cache:notices:${notice.slug}`);
   await invalidateAllNoticeCaches();
 
-  logger.info("Notice deleted", { noticeId });
+  logger.info('Notice deleted', { noticeId });
 
   emitAdminEvent(SOCKET_EVENTS.NOTICE_DELETED, {
     noticeId,
@@ -292,21 +292,21 @@ export const publishNotice = async (noticeId) => {
   const notice = await noticeRepository.findById(noticeId);
 
   if (!notice) {
-    throw new NotFoundError("Notice not found");
+    throw new NotFoundError('Notice not found');
   }
 
-  if (notice.status === "published") {
-    throw new BadRequestError("Notice is already published");
+  if (notice.status === 'published') {
+    throw new BadRequestError('Notice is already published');
   }
 
-  notice.status = "published";
+  notice.status = 'published';
   notice.publishedAt = new Date();
 
   await notice.save();
 
   await invalidateAllNoticeCaches();
 
-  logger.info("Notice published", { noticeId });
+  logger.info('Notice published', { noticeId });
 
   return notice;
 };
@@ -315,10 +315,10 @@ export const archiveNotice = async (noticeId) => {
   const notice = await noticeRepository.findById(noticeId);
 
   if (!notice) {
-    throw new NotFoundError("Notice not found");
+    throw new NotFoundError('Notice not found');
   }
 
-  notice.status = "archived";
+  notice.status = 'archived';
   notice.publishedAt = null;
 
   await notice.save();
@@ -326,7 +326,7 @@ export const archiveNotice = async (noticeId) => {
   await deleteCache(`cache:notices:${notice.slug}`);
   await invalidateAllNoticeCaches();
 
-  logger.info("Notice archived", { noticeId });
+  logger.info('Notice archived', { noticeId });
 
   return notice;
 };

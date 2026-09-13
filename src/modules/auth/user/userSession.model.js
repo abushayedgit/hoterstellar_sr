@@ -1,12 +1,12 @@
-import mongoose from "mongoose";
-import { baseSchemaOptions } from "../../../models/base.model.js";
-import { SECURITY } from "../../../constants/security.js";
+import mongoose from 'mongoose';
+import { baseSchemaOptions } from '../../../models/base.model.js';
+import { SECURITY } from '../../../constants/security.js';
 
 const userSessionSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true,
     },
@@ -17,7 +17,7 @@ const userSessionSchema = new mongoose.Schema(
     },
     deviceInfo: {
       type: String,
-      default: "",
+      default: '',
     },
     issuedAt: {
       type: Date,
@@ -34,7 +34,7 @@ const userSessionSchema = new mongoose.Schema(
     },
     replacedBySessionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "UserSession",
+      ref: 'UserSession',
       default: null,
     },
   },
@@ -47,4 +47,4 @@ userSessionSchema.methods.isActive = function () {
   return !this.revokedAt && this.expiresAt > new Date();
 };
 
-export const UserSession = mongoose.model("UserSession", userSessionSchema);
+export const UserSession = mongoose.model('UserSession', userSessionSchema);

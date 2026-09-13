@@ -1,23 +1,23 @@
-import mongoose from "mongoose";
-import { env } from "./env.js";
-import { logger } from "../utils/logger.js";
+import mongoose from 'mongoose';
+import { env } from './env.js';
+import { logger } from '../utils/logger.js';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 5000;
 let retryCount = 0;
 
 export const connectDB = async () => {
-  mongoose.connection.on("connected", () => {
-    logger.info("MongoDB connected successfully");
+  mongoose.connection.on('connected', () => {
+    logger.info('MongoDB connected successfully');
     retryCount = 0;
   });
 
-  mongoose.connection.on("error", (err) => {
+  mongoose.connection.on('error', (err) => {
     logger.error(`MongoDB connection error: ${err.message}`);
   });
 
-  mongoose.connection.on("disconnected", () => {
-    logger.warn("MongoDB disconnected");
+  mongoose.connection.on('disconnected', () => {
+    logger.warn('MongoDB disconnected');
   });
 
   const options = {
@@ -26,14 +26,14 @@ export const connectDB = async () => {
     minPoolSize: 5,
     socketTimeoutMS: 45000,
     family: 4,
-    autoIndex: env.NODE_ENV === "development",
+    autoIndex: env.NODE_ENV === 'development',
   };
 
   try {
     await mongoose.connect(env.MONGODB_URI, options);
     return mongoose.connection;
   } catch (error) {
-    logger.error("Failed to connect to MongoDB", error);
+    logger.error('Failed to connect to MongoDB', error);
 
     if (retryCount < MAX_RETRIES) {
       retryCount++;
@@ -50,5 +50,5 @@ export const connectDB = async () => {
 
 export const disconnectDatabase = async () => {
   await mongoose.connection.close();
-  logger.info("MongoDB connection closed");
+  logger.info('MongoDB connection closed');
 };

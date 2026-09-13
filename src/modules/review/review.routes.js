@@ -19,6 +19,7 @@ import {
   moderateReviewSchema,
   respondToReviewSchema,
   reviewQuerySchema,
+  createManualReviewSchema,
 } from './review.validator.js';
 
 import {
@@ -34,20 +35,19 @@ import {
   moderateReviewController,
   respondToReviewController,
   markReviewHelpfulController,
+  createManualReviewController,
 } from './review.controller.js';
 
 import { auditLog } from '../../middlewares/auditLog.middleware.js';
 
 const router = Router();
 
-const userAuth = createAuthMiddleware(
-  env.USER_JWT_SECRET,
-  async (userId) => User.findById(userId)
+const userAuth = createAuthMiddleware(env.USER_JWT_SECRET, async (userId) =>
+  User.findById(userId),
 );
 
-const adminAuth = createAuthMiddleware(
-  env.ADMIN_JWT_SECRET,
-  async (adminId) => Admin.findById(adminId)
+const adminAuth = createAuthMiddleware(env.ADMIN_JWT_SECRET, async (adminId) =>
+  Admin.findById(adminId),
 );
 
 // Public routes
@@ -55,48 +55,55 @@ router.get(
   '/food/:foodId',
   validateObjectIdParam('foodId'),
   validateQuery(reviewQuerySchema),
-  getPublicReviewsForFoodController
+  getPublicReviewsForFoodController,
 );
 
 router.post(
   '/:id/helpful',
   validateObjectIdParam('id'),
-  markReviewHelpfulController
+  markReviewHelpfulController,
 );
 
 // User routes
-router.get(
-  '/eligible-orders',
-  userAuth,
-  getEligibleOrdersController
+
+// SUPER ADMIN ONLY — Manual review creation
+router.post(
+  '/manual',
+  adminAuth,
+  requirePermission(PERMISSIONS.REVIEWS_CREATE_MANUAL),
+  validateBody(createManualReviewSchema),
+  auditLog('review.create.manual'),
+  createManualReviewController,
 );
+
+router.get('/eligible-orders', userAuth, getEligibleOrdersController);
 
 router.get(
   '/my-reviews',
   userAuth,
   validateQuery(reviewQuerySchema),
-  getUserReviewsController
+  getUserReviewsController,
 );
 
 router.post(
   '/food',
   userAuth,
   validateBody(createFoodReviewSchema),
-  createFoodReviewController
+  createFoodReviewController,
 );
 
 router.post(
   '/table',
   userAuth,
   validateBody(createTableReviewSchema),
-  createTableReviewController
+  createTableReviewController,
 );
 
 router.post(
   '/event',
   userAuth,
   validateBody(createEventReviewSchema),
-  createEventReviewController
+  createEventReviewController,
 );
 
 router.put(
@@ -104,14 +111,14 @@ router.put(
   userAuth,
   validateObjectIdParam('id'),
   validateBody(updateReviewSchema),
-  updateReviewController
+  updateReviewController,
 );
 
 router.delete(
   '/:id',
   userAuth,
   validateObjectIdParam('id'),
-  deleteReviewController
+  deleteReviewController,
 );
 
 // Admin routes
@@ -120,7 +127,7 @@ router.get(
   adminAuth,
   requirePermission(PERMISSIONS.REVIEWS_MODERATE),
   validateQuery(reviewQuerySchema),
-  listReviewsController
+  listReviewsController,
 );
 
 router.patch(
@@ -130,7 +137,7 @@ router.patch(
   validateObjectIdParam('id'),
   validateBody(moderateReviewSchema),
   auditLog('review.moderate'),
-  moderateReviewController
+  moderateReviewController,
 );
 
 router.post(
@@ -140,7 +147,7 @@ router.post(
   validateObjectIdParam('id'),
   validateBody(respondToReviewSchema),
   auditLog('review.respond'),
-  respondToReviewController
+  respondToReviewController,
 );
 
 export default router;

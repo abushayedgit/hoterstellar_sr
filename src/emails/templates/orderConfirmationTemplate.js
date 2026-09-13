@@ -1,4 +1,4 @@
-import { baseLayout } from "./baseLayout.js";
+import { baseLayout } from './baseLayout.js';
 
 export const orderConfirmationTemplate = ({
   orderNumber,
@@ -20,7 +20,7 @@ export const orderConfirmationTemplate = ({
     </div>
   `,
     )
-    .join("");
+    .join('');
 
   const content = `
     <p class="content-text">Dear ${customerName},</p>
@@ -70,12 +70,12 @@ export const orderConfirmationTemplate = ({
     </div>
     
     <p class="content-text">
-      We will notify you when your order is being prepared and ready for ${orderType === "delivery" ? "delivery" : orderType === "pickup" ? "pickup" : "serving"}.
+      We will notify you when your order is being prepared and ready for ${orderType === 'delivery' ? 'delivery' : orderType === 'pickup' ? 'pickup' : 'serving'}.
     </p>
   `;
 
   return baseLayout({
-    title: "Order Confirmation",
+    title: 'Order Confirmation',
     preheader: `Your order ${orderNumber} is confirmed`,
     content,
   });

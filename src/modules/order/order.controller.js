@@ -5,7 +5,7 @@ import {
   listOrders,
   updateOrderStatus,
   cancelOrder,
-} from "./order.service.js";
+} from './order.service.js';
 
 export const createOrderController = async (req, res, next) => {
   try {
@@ -17,8 +17,8 @@ export const createOrderController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      code: "CREATED",
-      message: "Order created successfully",
+      code: 'CREATED',
+      message: 'Order created successfully',
       data: { order },
     });
   } catch (error) {
@@ -36,8 +36,8 @@ export const getOrderController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Order retrieved",
+      code: 'OK',
+      message: 'Order retrieved',
       data: { order },
     });
   } catch (error) {
@@ -53,8 +53,8 @@ export const getUserOrdersController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Orders retrieved",
+      code: 'OK',
+      message: 'Orders retrieved',
       data: result,
     });
   } catch (error) {
@@ -69,8 +69,8 @@ export const listOrdersController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Orders retrieved",
+      code: 'OK',
+      message: 'Orders retrieved',
       data: result,
     });
   } catch (error) {
@@ -89,8 +89,8 @@ export const updateOrderStatusController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Order status updated",
+      code: 'OK',
+      message: 'Order status updated',
       data: { order },
     });
   } catch (error) {
@@ -110,8 +110,8 @@ export const cancelOrderController = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       statusCode: 200,
-      code: "OK",
-      message: "Order cancelled",
+      code: 'OK',
+      message: 'Order cancelled',
       data: { order },
     });
   } catch (error) {

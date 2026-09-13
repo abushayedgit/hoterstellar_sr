@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createFoodSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.number().min(0, "Price must be positive"),
-  category: z.string().min(1, "Category is required"),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  price: z.number().min(0, 'Price must be positive'),
+  category: z.string().min(1, 'Category is required'),
   images: z
     .array(
       z.object({
@@ -12,7 +12,7 @@ export const createFoodSchema = z.object({
         fileId: z.string().min(1),
       }),
     )
-    .min(1, "At least one image is required"),
+    .min(1, 'At least one image is required'),
   isAvailable: z.boolean().optional().default(true),
   isVegetarian: z.boolean().optional().default(false),
   isSpicy: z.boolean().optional().default(false),
@@ -64,12 +64,12 @@ export const foodQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
   category: z.string().optional(),
-  isAvailable: z.enum(["true", "false"]).optional(),
-  isVegetarian: z.enum(["true", "false"]).optional(),
-  isSpicy: z.enum(["true", "false"]).optional(),
+  isAvailable: z.enum(['true', 'false']).optional(),
+  isVegetarian: z.enum(['true', 'false']).optional(),
+  isSpicy: z.enum(['true', 'false']).optional(),
   search: z.string().optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
-  sortBy: z.enum(["name", "price", "rating", "createdAt"]).default("createdAt"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  sortBy: z.enum(['name', 'price', 'rating', 'createdAt']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

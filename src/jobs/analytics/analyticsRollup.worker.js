@@ -1,35 +1,35 @@
-import { Order } from "../../modules/order/order.model.js";
-import { Visitor } from "../../modules/visitor/visitor.model.js";
-import { PageTracking } from "../../modules/visitor/pageTracking.model.js";
-import { deleteCache } from "../../utils/cache.js";
-import { logger } from "../../utils/logger.js";
+import { Order } from '../../modules/order/order.model.js';
+import { Visitor } from '../../modules/visitor/visitor.model.js';
+import { PageTracking } from '../../modules/visitor/pageTracking.model.js';
+import { deleteCache } from '../../utils/cache.js';
+import { logger } from '../../utils/logger.js';
 
 export const analyticsRollupProcessor = async (job) => {
   const { type } = job.data;
 
-  logger.info("Processing analytics rollup", { jobId: job.id, type });
+  logger.info('Processing analytics rollup', { jobId: job.id, type });
 
   try {
     switch (type) {
-      case "daily":
+      case 'daily':
         await processDailyRollup();
         break;
-      case "weekly":
+      case 'weekly':
         await processWeeklyRollup();
         break;
-      case "monthly":
+      case 'monthly':
         await processMonthlyRollup();
         break;
       default:
-        logger.warn("Unknown rollup type", { type });
+        logger.warn('Unknown rollup type', { type });
     }
 
     // Clear analytics caches
-    await deleteCache("cache:analytics:*");
+    await deleteCache('cache:analytics:*');
 
     return { success: true, type };
   } catch (error) {
-    logger.error("Analytics rollup failed", {
+    logger.error('Analytics rollup failed', {
       jobId: job.id,
       type,
       error: error.message,
@@ -49,7 +49,7 @@ const processDailyRollup = async () => {
         $group: {
           _id: null,
           totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: { $sum: '$totalAmount' },
         },
       },
     ]),
@@ -57,7 +57,7 @@ const processDailyRollup = async () => {
     PageTracking.countDocuments({ createdAt: { $gte: today } }),
   ]);
 
-  logger.info("Daily rollup completed", {
+  logger.info('Daily rollup completed', {
     orders: orderStats[0]?.totalOrders || 0,
     revenue: orderStats[0]?.totalRevenue || 0,
     visitors: visitorStats,
@@ -76,14 +76,14 @@ const processWeeklyRollup = async () => {
         $group: {
           _id: null,
           totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: { $sum: '$totalAmount' },
         },
       },
     ]),
     Visitor.countDocuments({ createdAt: { $gte: weekAgo } }),
   ]);
 
-  logger.info("Weekly rollup completed", {
+  logger.info('Weekly rollup completed', {
     orders: orderStats[0]?.totalOrders || 0,
     revenue: orderStats[0]?.totalRevenue || 0,
     visitors: visitorStats,
@@ -101,14 +101,14 @@ const processMonthlyRollup = async () => {
         $group: {
           _id: null,
           totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: { $sum: '$totalAmount' },
         },
       },
     ]),
     Visitor.countDocuments({ createdAt: { $gte: monthAgo } }),
   ]);
 
-  logger.info("Monthly rollup completed", {
+  logger.info('Monthly rollup completed', {
     orders: orderStats[0]?.totalOrders || 0,
     revenue: orderStats[0]?.totalRevenue || 0,
     visitors: visitorStats,

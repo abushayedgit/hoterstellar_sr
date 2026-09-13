@@ -1,23 +1,23 @@
-import { Router } from "express";
-import { createAuthMiddleware } from "../../../middlewares/auth.base.middleware.js";
-import { requirePermission } from "../../../middlewares/authorize.middleware.js";
+import { Router } from 'express';
+import { createAuthMiddleware } from '../../../middlewares/auth.base.middleware.js';
+import { requirePermission } from '../../../middlewares/authorize.middleware.js';
 import {
   validateBody,
   validateQuery,
-} from "../../../middlewares/validate.middleware.js";
-import { validateObjectIdParam } from "../../../middlewares/objectId.middleware.js";
-import { optionalAuthMiddleware } from "../../../middlewares/optionalAuth.middleware.js";
-import { env } from "../../../config/env.js";
-import { PERMISSIONS } from "../../../constants/permissions.js";
-import { User } from "../../auth/user/user.model.js";
-import { Admin } from "../../auth/admin/admin.model.js";
+} from '../../../middlewares/validate.middleware.js';
+import { validateObjectIdParam } from '../../../middlewares/objectId.middleware.js';
+import { optionalAuthMiddleware } from '../../../middlewares/optionalAuth.middleware.js';
+import { env } from '../../../config/env.js';
+import { PERMISSIONS } from '../../../constants/permissions.js';
+import { User } from '../../auth/user/user.model.js';
+import { Admin } from '../../auth/admin/admin.model.js';
 import {
   createTableBookingSchema,
   updateTableBookingSchema,
   updateTableBookingStatusSchema,
   cancelTableBookingSchema,
   tableBookingQuerySchema,
-} from "./tableBooking.validator.js";
+} from './tableBooking.validator.js';
 import {
   createTableBookingController,
   getTableBookingController,
@@ -26,9 +26,9 @@ import {
   updateTableBookingController,
   updateTableBookingStatusController,
   cancelTableBookingController,
-} from "./tableBooking.controller.js";
-import { auditLog } from "../../../middlewares/auditLog.middleware.js";
-import { recaptchaMiddleware } from "../../../middlewares/recaptcha.middleware.js";
+} from './tableBooking.controller.js';
+import { auditLog } from '../../../middlewares/auditLog.middleware.js';
+import { recaptchaMiddleware } from '../../../middlewares/recaptcha.middleware.js';
 
 const router = Router();
 
@@ -41,7 +41,7 @@ const adminAuth = createAuthMiddleware(env.ADMIN_JWT_SECRET, async (adminId) =>
 );
 
 router.post(
-  "/",
+  '/',
   optionalAuthMiddleware,
   recaptchaMiddleware,
   validateBody(createTableBookingSchema),
@@ -49,52 +49,52 @@ router.post(
 );
 
 router.get(
-  "/my-bookings",
+  '/my-bookings',
   userAuth,
   validateQuery(tableBookingQuerySchema),
   getUserTableBookingsController,
 );
 
 router.get(
-  "/:id",
+  '/:id',
   optionalAuthMiddleware,
-  validateObjectIdParam("id"),
+  validateObjectIdParam('id'),
   getTableBookingController,
 );
 
 router.post(
-  "/:id/cancel",
+  '/:id/cancel',
   userAuth,
-  validateObjectIdParam("id"),
+  validateObjectIdParam('id'),
   validateBody(cancelTableBookingSchema),
   cancelTableBookingController,
 );
 
 router.get(
-  "/",
+  '/',
   adminAuth,
-  requirePermission(PERMISSIONS.BOOKINGS_READ_ALL),
+  requirePermission(PERMISSIONS.BOOKINGS_READ),
   validateQuery(tableBookingQuerySchema),
   listTableBookingsController,
 );
 
 router.put(
-  "/:id",
+  '/:id',
   adminAuth,
   requirePermission(PERMISSIONS.BOOKINGS_UPDATE),
-  validateObjectIdParam("id"),
+  validateObjectIdParam('id'),
   validateBody(updateTableBookingSchema),
-  auditLog("tableBooking.update"),
+  auditLog('tableBooking.update'),
   updateTableBookingController,
 );
 
 router.patch(
-  "/:id/status",
+  '/:id/status',
   adminAuth,
-  requirePermission(PERMISSIONS.BOOKINGS_UPDATE),
-  validateObjectIdParam("id"),
+  requirePermission(PERMISSIONS.BOOKINGS_ACCEPT),
+  validateObjectIdParam('id'),
   validateBody(updateTableBookingStatusSchema),
-  auditLog("tableBooking.status.update"),
+  auditLog('tableBooking.status.update'),
   updateTableBookingStatusController,
 );
 

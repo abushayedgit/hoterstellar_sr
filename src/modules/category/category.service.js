@@ -1,14 +1,14 @@
-import { Category } from "./category.model.js";
-import { Food } from "../food/food.model.js";
-import { NotFoundError } from "../../errors/NotFoundError.js";
-import { ConflictError } from "../../errors/ConflictError.js";
-import { BadRequestError } from "../../errors/BadRequestError.js";
-import { logger } from "../../utils/logger.js";
-import { generateSlug } from "../../utils/slug.js";
-import { getCache, setCache, deleteCache } from "../../utils/cache.js";
-import { uploadToImageKit, deleteFromImageKit } from "../../config/storage.js";
-import { emitAdminEvent } from "../../utils/socketEmitter.js";
-import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { Category } from './category.model.js';
+import { Food } from '../food/food.model.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
+import { ConflictError } from '../../errors/ConflictError.js';
+import { BadRequestError } from '../../errors/BadRequestError.js';
+import { logger } from '../../utils/logger.js';
+import { generateSlug } from '../../utils/slug.js';
+import { getCache, setCache, deleteCache } from '../../utils/cache.js';
+import { uploadToImageKit, deleteFromImageKit } from '../../config/storage.js';
+import { emitAdminEvent } from '../../utils/socketEmitter.js';
+import { SOCKET_EVENTS } from '../../constants/socketEvents.js';
 
 let trackedCategoryCacheKeys = new Set();
 
@@ -24,24 +24,24 @@ export const createCategory = async (categoryData, imageFile) => {
 
   const existingCategory = await Category.findOne({ name });
   if (existingCategory) {
-    throw new ConflictError("Category with this name already exists");
+    throw new ConflictError('Category with this name already exists');
   }
 
   const slug = generateSlug(name);
   const existingSlug = await Category.findOne({ slug });
   if (existingSlug) {
-    throw new ConflictError("Category slug already exists");
+    throw new ConflictError('Category slug already exists');
   }
 
-  let image = "";
-  let imageId = "";
+  let image = '';
+  let imageId = '';
 
   if (imageFile) {
     const fileName = `category-${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const result = await uploadToImageKit(
       imageFile.buffer,
       fileName,
-      "categories",
+      'categories',
     );
     image = result.url;
     imageId = result.fileId;
@@ -56,7 +56,7 @@ export const createCategory = async (categoryData, imageFile) => {
 
   await invalidateAllCategoryCaches();
 
-  logger.info("Category created", { categoryId: category._id });
+  logger.info('Category created', { categoryId: category._id });
 
   emitAdminEvent(SOCKET_EVENTS.CATEGORY_CREATED, {
     categoryId: category._id,
@@ -72,11 +72,11 @@ export const listCategories = async (query) => {
     page = 1,
     limit = 10,
     isActive,
-    sortBy = "displayOrder",
-    sortOrder = "asc",
+    sortBy = 'displayOrder',
+    sortOrder = 'asc',
   } = query;
 
-  const cacheKey = `cache:categories:public:${page}:${limit}:${isActive || ""}:${sortBy}:${sortOrder}`;
+  const cacheKey = `cache:categories:public:${page}:${limit}:${isActive || ''}:${sortBy}:${sortOrder}`;
 
   const cached = await getCache(cacheKey);
   if (cached) {
@@ -84,9 +84,9 @@ export const listCategories = async (query) => {
   }
 
   const filter = {};
-  if (isActive !== undefined) filter.isActive = isActive === "true";
+  if (isActive !== undefined) filter.isActive = isActive === 'true';
 
-  const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
   const skip = (page - 1) * limit;
 
   const [categories, total] = await Promise.all([
@@ -125,7 +125,7 @@ export const getCategoryById = async (categoryId) => {
   const category = await Category.findById(categoryId);
 
   if (!category) {
-    throw new NotFoundError("Category not found");
+    throw new NotFoundError('Category not found');
   }
 
   const categoryData = category.toJSON();
@@ -138,13 +138,13 @@ export const updateCategory = async (categoryId, updateData, imageFile) => {
   const category = await Category.findById(categoryId);
 
   if (!category) {
-    throw new NotFoundError("Category not found");
+    throw new NotFoundError('Category not found');
   }
 
   if (updateData.name && updateData.name !== category.name) {
     const existingCategory = await Category.findOne({ name: updateData.name });
     if (existingCategory && existingCategory._id.toString() !== categoryId) {
-      throw new ConflictError("Category with this name already exists");
+      throw new ConflictError('Category with this name already exists');
     }
     updateData.slug = generateSlug(updateData.name);
   }
@@ -157,11 +157,11 @@ export const updateCategory = async (categoryId, updateData, imageFile) => {
     }
 
     // Upload new image
-    const fileName = `category-${category.slug || "update"}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const fileName = `category-${category.slug || 'update'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const result = await uploadToImageKit(
       imageFile.buffer,
       fileName,
-      "categories",
+      'categories',
     );
     category.image = result.url;
     category.imageId = result.fileId;
@@ -173,7 +173,7 @@ export const updateCategory = async (categoryId, updateData, imageFile) => {
   await deleteCache(`cache:categories:${categoryId}`);
   await invalidateAllCategoryCaches();
 
-  logger.info("Category updated", { categoryId });
+  logger.info('Category updated', { categoryId });
 
   emitAdminEvent(SOCKET_EVENTS.CATEGORY_UPDATED, {
     categoryId,
@@ -188,7 +188,7 @@ export const deleteCategory = async (categoryId) => {
   const category = await Category.findById(categoryId);
 
   if (!category) {
-    throw new NotFoundError("Category not found");
+    throw new NotFoundError('Category not found');
   }
 
   const foodCount = await Food.countDocuments({ category: categoryId });
@@ -212,7 +212,7 @@ export const deleteCategory = async (categoryId) => {
     categoryId,
   });
 
-  logger.info("Category deleted", { categoryId });
+  logger.info('Category deleted', { categoryId });
 
   return true;
 };
