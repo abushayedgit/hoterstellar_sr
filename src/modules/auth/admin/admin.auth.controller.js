@@ -144,8 +144,11 @@ export const createAdminController = async (req, res, next) => {
 export const requestPasswordResetController = async (req, res, next) => {
   try {
     const { email } = req.body;
+    const ip =
+      req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
+    const userAgent = req.headers['user-agent'] || '';
 
-    await requestPasswordReset(email);
+    await requestPasswordReset(email, { ip, userAgent });
 
     return res.status(200).json({
       success: true,
@@ -161,14 +164,18 @@ export const requestPasswordResetController = async (req, res, next) => {
 export const resetPasswordController = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
+    const ip =
+      req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '';
+    const userAgent = req.headers['user-agent'] || '';
 
-    await resetPassword(token, newPassword);
+    await resetPassword(token, newPassword, { ip, userAgent });
 
     return res.status(200).json({
       success: true,
       statusCode: 200,
       code: 'OK',
-      message: 'Password reset successfully',
+      message:
+        'Password reset successfully. Please log in with your new password.',
     });
   } catch (error) {
     next(error);
