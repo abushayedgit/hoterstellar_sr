@@ -13,7 +13,6 @@ export const adminWelcomeTemplate = ({
   createdByName = 'Super Administrator',
   createdByEmail = '',
   createdAt = new Date(),
-  expiresInHours = 72,
   supportEmail = 'support@hoterstellar.com',
   tempPasswordExpiryHours = 72,
 }) => {
