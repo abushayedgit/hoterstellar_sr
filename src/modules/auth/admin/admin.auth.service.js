@@ -16,6 +16,13 @@ import { logger } from '../../../utils/logger.js';
 import { getBrevoClient } from '../../../config/brevo.js';
 import { emitAdminEvent } from '../../../utils/socketEmitter.js';
 import { SOCKET_EVENTS } from '../../../constants/socketEvents.js';
+import { AdminPasswordReset } from './adminPasswordReset.model.js';
+import { adminPasswordResetTemplate } from '../../../emails/templates/adminPasswordResetTemplate.js';
+import { adminWelcomeTemplate } from '../../../emails/templates/adminWelcomeTemplate.js';
+
+const TEMP_PASSWORD_EXPIRY_HOURS = 72;
+const RESET_TOKEN_EXPIRY_MINUTES = 60;
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@hoterstellar.com';
 
 export const adminLogin = async ({ email, password, deviceInfo }) => {
   const admin = await Admin.findOne({ email }).select('+password');
@@ -166,6 +173,12 @@ export const changePassword = async (adminId, currentPassword, newPassword) => {
     { revokedAt: new Date() },
   );
 
+  // ALSO invalidate any pending reset tokens
+  await AdminPasswordReset.updateMany(
+    { adminId: admin._id, usedAt: null, invalidatedAt: null },
+    { invalidatedAt: new Date() },
+  );
+
   logger.info('Admin changed password', { adminId: admin._id });
 
   return true;
@@ -179,8 +192,15 @@ export const createAdmin = async (adminData, createdByAdminId) => {
     throw new ConflictError('Admin with this email already exists');
   }
 
-  // Generate temporary password
-  const tempPassword = crypto.randomBytes(12).toString('base64').slice(0, 16);
+  // Verify creator exists
+  const creator = await Admin.findById(createdByAdminId);
+
+  // Generate temporary password (16 chars, base64-url-safe)
+  const tempPassword = crypto
+    .randomBytes(12)
+    .toString('base64')
+    .replace(/[+/=]/g, '')
+    .slice(0, 16);
 
   const admin = await Admin.create({
     email,
@@ -191,85 +211,224 @@ export const createAdmin = async (adminData, createdByAdminId) => {
     createdBy: createdByAdminId,
   });
 
-  // Send email with temp password
+  // Send welcome email with temp password
   const brevoClient = getBrevoClient();
   if (brevoClient) {
     try {
+      const loginUrl = `${env.CLIENT_DASHBOARD_URL}/login`;
+      const html = adminWelcomeTemplate({
+        name: admin.name,
+        email: admin.email,
+        tempPassword,
+        role: admin.role,
+        loginUrl,
+        createdByName: creator?.name || 'Super Administrator',
+        createdByEmail: creator?.email || '',
+        createdAt: admin.createdAt || new Date(),
+        tempPasswordExpiryHours: TEMP_PASSWORD_EXPIRY_HOURS,
+        supportEmail: process.env.SUPPORT_EMAIL || 'support@hoterstellar.com',
+      });
+
       await brevoClient.sendEmail({
-        to: email,
-        subject: 'Your Hoterstellar Admin Account',
-        html: `
-          <h2>Welcome to Hoterstellar</h2>
-          <p>Your admin account has been created.</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Temporary Password:</strong> ${tempPassword}</p>
-          <p>You will be required to change this password on first login.</p>
-        `,
+        to: admin.email,
+        subject: `Welcome to Hoterstellar — Your ${roleLabelFor(admin.role)} Account`,
+        html,
+      });
+
+      logger.info('Admin welcome email sent', {
+        adminId: admin._id,
+        email: admin.email,
       });
     } catch (error) {
       logger.error('Failed to send admin welcome email', {
+        adminId: admin._id,
         error: error.message,
       });
     }
+  } else {
+    logger.warn('Brevo not configured — admin welcome email not sent', {
+      adminId: admin._id,
+    });
   }
+
   emitAdminEvent(SOCKET_EVENTS.ADMIN_CREATED, {
     adminId: admin._id,
     email: admin.email,
     name: admin.name,
     role: admin.role,
   });
+
   logger.info('Admin created', {
     adminId: admin._id,
     createdBy: createdByAdminId,
+    role: admin.role,
   });
 
   return admin.toSafeObject();
 };
 
-export const requestPasswordReset = async (email) => {
+const roleLabelFor = (role) => {
+  const map = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    manager: 'Manager',
+  };
+  return map[role] || 'Admin';
+};
+
+/**
+ * Request password reset — sends email with reset link.
+ * Always returns success (prevents email enumeration).
+ */
+export const requestPasswordReset = async (email, requestMeta = {}) => {
+  const { ip = '', userAgent = '' } = requestMeta;
+
   const admin = await Admin.findOne({ email });
 
   // Always return success to prevent email enumeration
   if (!admin) {
+    logger.info('Password reset requested for non-existent email', { email });
     return true;
   }
 
-  const resetToken = generateRandomToken(32);
-  const resetTokenHash = hashToken(resetToken);
+  if (!admin.isActive) {
+    logger.warn('Password reset requested for deactivated admin', { email });
+    return true;
+  }
 
-  // Store reset token in Redis (will implement in Phase 16)
-  // For now, store in a simple way
-  const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  // Invalidate all previous unused reset tokens for this admin
+  await AdminPasswordReset.updateMany(
+    {
+      adminId: admin._id,
+      usedAt: null,
+      invalidatedAt: null,
+    },
+    { invalidatedAt: new Date() },
+  );
+
+  // Generate token
+  const rawToken = generateRandomToken(32);
+  const tokenHash = hashToken(rawToken);
+  const expiresAt = new Date(
+    Date.now() + RESET_TOKEN_EXPIRY_MINUTES * 60 * 1000,
+  );
+
+  await AdminPasswordReset.create({
+    adminId: admin._id,
+    tokenHash,
+    requestedIp: ip,
+    requestedUserAgent: userAgent,
+    expiresAt,
+  });
+
+  // Build reset URL
+  const resetUrl = `${env.CLIENT_DASHBOARD_URL}/reset-password?token=${rawToken}`;
 
   // Send email
   const brevoClient = getBrevoClient();
   if (brevoClient) {
     try {
-      const resetUrl = `${env.CLIENT_DASHBOARD_URL}/reset-password?token=${resetToken}`;
+      const html = adminPasswordResetTemplate({
+        name: admin.name,
+        email: admin.email,
+        resetUrl,
+        expiresInMinutes: RESET_TOKEN_EXPIRY_MINUTES,
+        requestedIp: ip,
+        requestedDevice: userAgent,
+        requestedAt: new Date(),
+        supportEmail: SUPPORT_EMAIL,
+      });
+
       await brevoClient.sendEmail({
-        to: email,
-        subject: 'Reset Your Admin Password',
-        html: `
-          <h2>Password Reset Request</h2>
-          <p>Click the link below to reset your password:</p>
-          <p><a href="${resetUrl}">Reset Password</a></p>
-          <p>This link will expire in 1 hour.</p>
-        `,
+        to: admin.email,
+        subject: 'Reset Your Hoterstellar Admin Password',
+        html,
+      });
+
+      logger.info('Password reset email sent', {
+        adminId: admin._id,
+        email: admin.email,
       });
     } catch (error) {
       logger.error('Failed to send password reset email', {
+        adminId: admin._id,
         error: error.message,
       });
     }
+  } else {
+    logger.warn('Brevo not configured — password reset email not sent', {
+      adminId: admin._id,
+    });
   }
-
-  logger.info('Password reset requested', { email });
 
   return true;
 };
 
-export const resetPassword = async (token, newPassword) => {
-  // In production, verify token from Redis
-  // For now, just update password
-  throw new BadRequestError('Password reset not fully implemented yet');
+/**
+ * Reset password using token — verifies, updates, revokes sessions.
+ */
+export const resetPassword = async (
+  rawToken,
+  newPassword,
+  requestMeta = {},
+) => {
+  const { ip = '', userAgent = '' } = requestMeta;
+
+  if (!rawToken || !newPassword) {
+    throw new BadRequestError('Token and new password are required');
+  }
+
+  const tokenHash = hashToken(rawToken);
+
+  const resetRecord = await AdminPasswordReset.findOne({
+    tokenHash,
+    usedAt: null,
+    invalidatedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!resetRecord) {
+    logger.warn('Invalid or expired password reset token used', { ip });
+    throw new BadRequestError('Invalid or expired reset token');
+  }
+
+  const admin = await Admin.findById(resetRecord.adminId).select('+password');
+
+  if (!admin) {
+    // Token references a non-existent admin — mark invalid and fail
+    resetRecord.invalidatedAt = new Date();
+    await resetRecord.save();
+    throw new BadRequestError('Invalid or expired reset token');
+  }
+
+  if (!admin.isActive) {
+    resetRecord.invalidatedAt = new Date();
+    await resetRecord.save();
+    throw new BadRequestError('Account is deactivated');
+  }
+
+  // Update password (model pre-save hook will hash it)
+  admin.password = newPassword;
+  admin.mustChangePassword = false;
+  admin.lastLoginAt = admin.lastLoginAt || null;
+  await admin.save();
+
+  // Mark token as used
+  resetRecord.usedAt = new Date();
+  await resetRecord.save();
+
+  // Revoke all active sessions for this admin
+  await AdminSession.updateMany(
+    { adminId: admin._id, revokedAt: null },
+    { revokedAt: new Date() },
+  );
+
+  logger.info('Admin password reset successful', {
+    adminId: admin._id,
+    email: admin.email,
+    ip,
+    userAgent,
+  });
+
+  return true;
 };

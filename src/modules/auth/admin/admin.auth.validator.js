@@ -30,11 +30,12 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
   newPassword: z
     .string()
-    .min(12, 'New password must be at least 12 characters')
-    .regex(/[A-Z]/, 'Must contain uppercase letter')
-    .regex(/[a-z]/, 'Must contain lowercase letter')
-    .regex(/[0-9]/, 'Must contain number')
-    .regex(/[^A-Za-z0-9]/, 'Must contain special character'),
+    .min(12, 'Password must be at least 12 characters')
+    .max(128, 'Password too long')
+    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Must contain at least one number')
+    .regex(/[^A-Za-z0-9]/, 'Must contain at least one special character'),
 });
 
 export const createAdminSchema = z.object({
