@@ -117,7 +117,7 @@ export const userSignupVerify = async (email, code, deviceInfo) => {
   const user = await User.create(userData);
 
   const payload = {
-    sub: user._id.toString(),
+    subs: user._id.toString(),
     userId: user._id.toString(),
     type: 'user',
   };
@@ -222,7 +222,7 @@ export const userSigninVerify = async (email, code, deviceInfo) => {
   }
 
   const payload = {
-    sub: user._id.toString(),
+    subs: user._id.toString(),
     userId: user._id.toString(),
     type: 'user',
   };
@@ -272,7 +272,7 @@ export const userRefresh = async (refreshToken, deviceInfo) => {
   await session.save();
 
   const payload = {
-    sub: user._id.toString(),
+    subs: user._id.toString(),
     userId: user._id.toString(),
     type: 'user',
   };
