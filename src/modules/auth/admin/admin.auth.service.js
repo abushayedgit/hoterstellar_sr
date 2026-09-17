@@ -42,7 +42,7 @@ export const adminLogin = async ({ email, password, deviceInfo }) => {
   }
 
   const payload = {
-    sub: admin._id.toString(),
+    subs: admin._id.toString(),
     adminId: admin._id.toString(),
     role: admin.role,
     type: 'admin',
@@ -98,7 +98,7 @@ export const adminRefresh = async (refreshToken, deviceInfo) => {
   await session.save();
 
   const payload = {
-    sub: admin._id.toString(),
+    subs: admin._id.toString(),
     adminId: admin._id.toString(),
     role: admin.role,
     type: 'admin',

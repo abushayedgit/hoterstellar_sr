@@ -24,7 +24,7 @@ export const createAuthMiddleware = (secret, getUserById) => {
       const payload = verifyAccessToken(token, secret);
 
       const user = await getUserById(
-        payload.sub || payload.id || payload.adminId,
+        payload?.subs || payload.id || payload.adminId,
       );
 
       if (!user) {
