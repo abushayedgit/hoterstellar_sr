@@ -20,11 +20,9 @@ export const seedSuperAdmin = async () => {
     return;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
-
   await Admin.create({
     email,
-    password: hashedPassword,
+    password,
     name: 'Super Admin',
     role: 'super_admin',
     isActive: true,

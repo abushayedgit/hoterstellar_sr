@@ -27,8 +27,10 @@
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.3.4",
     "chalk": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dayjs": "^1.11.23",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "express-validator": "^7.3.2",
@@ -41,8 +43,7 @@
     "rate-limit-redis": "^6.0.1",
     "socket.io": "^4.8.3",
     "uuid": "^14.0.2",
-    "zod": "^4.5.4",
-    "dotenv": "^17.4.2"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
