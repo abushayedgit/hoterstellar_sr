@@ -1,6 +1,8 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 import { requestIdMiddleware } from '../middlewares/requestId.middleware.js';
 import { requestLoggerMiddleware } from '../middlewares/requestLogger.middleware.js';
@@ -15,7 +17,6 @@ import {
   setCsrfCookie,
   csrfProtection,
 } from '../middlewares/csrf.middleware.js';
-import mongoose from 'mongoose';
 
 const app = express();
 
@@ -27,7 +28,13 @@ app.use(
     origin: env.CORS_ORIGINS,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-request-id',
+      'x-csrf-token', // ← REQUIRED for refresh
+    ],
+    exposedHeaders: ['x-request-id'],
   }),
 );
 
@@ -37,8 +44,20 @@ app.use(requestLoggerMiddleware);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
+// Required before setCsrfCookie / csrfProtection so they can read cookies.
+app.use(cookieParser());
+
 app.use(sanitizeRequestMiddleware);
 app.use(globalRateLimiter);
+
+// ─────────────────────────────────────────────────────────────
+// CSRF must be mounted BEFORE the router and BEFORE the 404 handler.
+// setCsrfCookie issues the double-submit cookie for every request;
+// csrfProtection guards the specific refresh endpoints.
+// ─────────────────────────────────────────────────────────────
+app.use(setCsrfCookie);
+app.use('/api/v1/auth/admin/refresh', csrfProtection);
+app.use('/api/v1/auth/user/refresh', csrfProtection);
 
 app.use('/api/v1', apiRoutes);
 
@@ -48,10 +67,7 @@ app.get('/health', (req, res) => {
     statusCode: 200,
     code: 'OK',
     message: 'Server is healthy',
-    data: {
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    },
+    data: { uptime: process.uptime(), timestamp: new Date().toISOString() },
   });
 });
 
@@ -74,21 +90,21 @@ app.get('/ready', async (req, res) => {
           },
         },
       });
-    } else {
-      return res.status(503).json({
-        success: false,
-        statusCode: 503,
-        code: 'NOT_READY',
-        message: 'Server is not ready',
-        data: {
-          dependencies: {
-            mongodb: 'disconnected',
-            redis: redisOk ? 'connected' : 'unavailable',
-          },
-        },
-      });
     }
-  } catch (err) {
+
+    return res.status(503).json({
+      success: false,
+      statusCode: 503,
+      code: 'NOT_READY',
+      message: 'Server is not ready',
+      data: {
+        dependencies: {
+          mongodb: 'disconnected',
+          redis: redisOk ? 'connected' : 'unavailable',
+        },
+      },
+    });
+  } catch {
     return res.status(503).json({
       success: false,
       statusCode: 503,
@@ -109,10 +125,4 @@ app.use((req, res) => {
 
 app.use(errorHandlerMiddleware);
 
-// After cookie parser (if using), before routes
-app.use(setCsrfCookie);
-
-// Apply CSRF protection to auth refresh endpoints
-app.use('/api/v1/auth/admin/refresh', csrfProtection);
-app.use('/api/v1/auth/user/refresh', csrfProtection);
 export default app;

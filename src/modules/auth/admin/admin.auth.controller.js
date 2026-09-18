@@ -45,11 +45,13 @@ export const loginController = async (req, res, next) => {
   }
 };
 
-export const refreshController = async (req, res, next) => {
+export const refreshController = async (req, res) => {
   try {
     const refreshToken =
       req.cookies?.[env.ADMIN_REFRESH_COOKIE_NAME] || req.body.refreshToken;
     const deviceInfo = req.headers['user-agent'] || 'Unknown device';
+
+    console.log('Refresh token received:', req?.cookies?.admin_refresh_token);
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -80,7 +82,12 @@ export const refreshController = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    return res.status(401).json({
+      success: false,
+      statusCode: 401,
+      code: 'AUTHENTICATION_ERROR',
+      message: error.message || 'Invalid refresh token',
+    });
   }
 };
 
