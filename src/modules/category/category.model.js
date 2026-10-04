@@ -49,7 +49,7 @@ categorySchema.pre('save', function (next) {
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
-  next();
+  return;
 });
 
 export const Category = mongoose.model('Category', categorySchema);
