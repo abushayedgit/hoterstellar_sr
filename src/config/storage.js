@@ -49,7 +49,7 @@ export const uploadToImageKit = async (
   }
 
   try {
-    const result = await imagekit.upload({
+    const result = await imagekit?.files?.upload({
       file: fileBuffer.toString('base64'),
       fileName,
       folder: `/${folder}`,
@@ -74,7 +74,7 @@ export const deleteFromImageKit = async (fileId) => {
   }
 
   try {
-    await imagekit.deleteFile(fileId);
+    await imagekit?.files?.deleteFile(fileId);
     logger.info('ImageKit file deleted', { fileId });
     return true;
   } catch (error) {
