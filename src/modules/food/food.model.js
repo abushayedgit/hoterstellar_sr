@@ -105,7 +105,7 @@ foodSchema.pre('save', function (next) {
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
-  next();
+  return;
 });
 
 export const Food = mongoose.model('Food', foodSchema);

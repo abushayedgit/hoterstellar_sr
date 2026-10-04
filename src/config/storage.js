@@ -74,7 +74,7 @@ export const deleteFromImageKit = async (fileId) => {
   }
 
   try {
-    await imagekit?.files?.deleteFile(fileId);
+    await imagekit?.files?.delete(fileId);
     logger.info('ImageKit file deleted', { fileId });
     return true;
   } catch (error) {
