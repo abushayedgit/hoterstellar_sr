@@ -83,7 +83,7 @@ export const updateFoodController = async (req, res, next) => {
 export const deleteSpecificImageController = async (req, res, next) => {
   try {
     const { id: foodId, imageId } = req.params;
-
+    console.log({ foodId: req.params.id, imageId: req.params.imageId });
     const remainingImages = await deleteSpecificImage(foodId, imageId);
 
     return res.status(200).json({

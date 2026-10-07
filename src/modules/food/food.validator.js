@@ -70,13 +70,10 @@ export const foodQuerySchema = z.object({
   sortBy: z.enum(['name', 'price', 'rating', 'createdAt']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
-export const imageIdParamSchema = z.object({
+export const imageDeleteParamSchema = z.object({
+  id: z.string().min(1, 'Food ID is required').max(24, 'Food ID is too long'),
   imageId: z
     .string()
     .min(1, 'Image ID is required')
     .max(200, 'Image ID is too long'),
-});
-
-export const foodIdParamSchema = z.object({
-  id: z.string(),
 });
