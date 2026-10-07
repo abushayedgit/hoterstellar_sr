@@ -14,7 +14,7 @@ import {
   createFoodSchema,
   updateFoodSchema,
   foodQuerySchema,
-  imageIdParamSchema,
+  imageDeleteParamSchema,
 } from './food.validator.js';
 import {
   createFoodController,
@@ -80,7 +80,7 @@ router.delete(
   adminAuth,
   requirePermission(PERMISSIONS.FOODS_UPDATE),
   validateObjectIdParam('id'),
-  validateParams(imageIdParamSchema),
+  validateParams(imageDeleteParamSchema),
   auditLog('food.image.delete'),
   deleteSpecificImageController,
 );

@@ -85,6 +85,7 @@ export const validateParams = (schema) => {
       mutateInPlace(req.params, parsed); // ✅ Express 5 safe
       next();
     } catch (error) {
+      // console.error('Params validation error:', error);
       if (error instanceof ZodError) {
         next(
           new ValidationError(
