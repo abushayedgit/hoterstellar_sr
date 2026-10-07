@@ -162,6 +162,9 @@ export const getFoodById = async (foodId) => {
   return foodData;
 };
 
+// ============================================================
+// UPDATE FOOD — Appends new images, never deletes existing ones
+// ============================================================
 export const updateFood = async (foodId, updateData, imageFiles) => {
   const food = await Food.findById(foodId);
 
@@ -169,6 +172,7 @@ export const updateFood = async (foodId, updateData, imageFiles) => {
     throw new NotFoundError('Food not found');
   }
 
+  // ---------- Name change → new slug ----------
   if (updateData.name && updateData.name !== food.name) {
     const existingFood = await Food.findOne({ name: updateData.name });
     if (existingFood && existingFood._id.toString() !== foodId) {
@@ -177,6 +181,7 @@ export const updateFood = async (foodId, updateData, imageFiles) => {
     updateData.slug = generateSlug(updateData.name);
   }
 
+  // ---------- Category existence check ----------
   if (updateData.category) {
     const categoryExists = await Category.findById(updateData.category);
     if (!categoryExists) {
@@ -184,31 +189,59 @@ export const updateFood = async (foodId, updateData, imageFiles) => {
     }
   }
 
-  // Replace images if new ones uploaded
+  // ---------- Append new images (never replace) ----------
   if (imageFiles && imageFiles.length > 0) {
-    // Delete old images
-    for (const oldImage of food.images) {
-      await deleteFromImageKit(oldImage.fileId);
+    const MAX_IMAGES_PER_FOOD = 8;
+    const currentCount = food.images.length;
+    const incomingCount = imageFiles.length;
+
+    if (currentCount + incomingCount > MAX_IMAGES_PER_FOOD) {
+      throw new BadRequestError(
+        `Cannot add ${incomingCount} image(s). Max ${MAX_IMAGES_PER_FOOD} images per food. Currently has ${currentCount}.`,
+      );
     }
 
-    // Upload new images
     const uploadedImages = [];
-    for (const file of imageFiles) {
-      const fileName = `food-${food.slug}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const result = await uploadToImageKit(file.buffer, fileName, 'foods');
-      uploadedImages.push({ url: result.url, fileId: result.fileId });
+
+    try {
+      for (const file of imageFiles) {
+        const fileName = `food-${food.slug}-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 8)}`;
+        const result = await uploadToImageKit(file.buffer, fileName, 'foods');
+        uploadedImages.push({ url: result.url, fileId: result.fileId });
+      }
+    } catch (error) {
+      // Rollback uploaded images if any upload failed mid-way
+      for (const img of uploadedImages) {
+        await deleteFromImageKit(img.fileId).catch(() => {});
+      }
+      logger.error('Image upload failed during food update', {
+        foodId,
+        error: error.message,
+      });
+      throw new BadRequestError('Failed to upload images. Please try again.');
     }
 
-    food.images = uploadedImages;
+    // Append to existing images — do NOT overwrite
+    food.images.push(...uploadedImages);
   }
 
-  Object.assign(food, updateData);
+  // ---------- Apply other field updates ----------
+  // Remove images from updateData so it can't accidentally overwrite
+  const { images: _ignoredImages, ...safeUpdateData } = updateData;
+  Object.assign(food, safeUpdateData);
+
   await food.save();
 
   await deleteCache(`cache:foods:${foodId}`);
   await invalidateAllFoodCaches();
 
-  logger.info('Food updated', { foodId });
+  logger.info('Food updated', {
+    foodId,
+    addedImages: imageFiles?.length || 0,
+    totalImages: food.images.length,
+  });
 
   emitAdminEvent(SOCKET_EVENTS.FOOD_UPDATED, {
     foodId,
@@ -218,6 +251,68 @@ export const updateFood = async (foodId, updateData, imageFiles) => {
   });
 
   return food;
+};
+
+// ============================================================
+// DELETE SPECIFIC IMAGE — Remove one image from food
+// ============================================================
+const MIN_IMAGES_PER_FOOD = 1;
+
+export const deleteSpecificImage = async (foodId, imageId) => {
+  const food = await Food.findById(foodId);
+
+  if (!food) {
+    throw new NotFoundError('Food not found');
+  }
+
+  // Prevent leaving food with zero images
+  if (food.images.length <= MIN_IMAGES_PER_FOOD) {
+    throw new BadRequestError(
+      `Cannot delete the last image. Food must have at least ${MIN_IMAGES_PER_FOOD} image.`,
+    );
+  }
+
+  const imageIndex = food.images.findIndex((img) => img.fileId === imageId);
+
+  if (imageIndex === -1) {
+    throw new NotFoundError('Image not found on this food');
+  }
+
+  // Step 1: Remove from array
+  const [removedImage] = food.images.splice(imageIndex, 1);
+
+  // Step 2: Save DB FIRST (source of truth)
+  await food.save();
+
+  // Step 3: THEN delete from ImageKit (after DB success)
+  try {
+    await deleteFromImageKit(removedImage.fileId);
+  } catch (error) {
+    // Non-fatal — image is removed from DB. Log and continue.
+    logger.warn('Failed to delete image from ImageKit', {
+      foodId,
+      imageId: removedImage.fileId,
+      error: error.message,
+    });
+  }
+
+  await deleteCache(`cache:foods:${foodId}`);
+  await invalidateAllFoodCaches();
+
+  logger.info('Image deleted from food', {
+    foodId,
+    imageId,
+    remainingImages: food.images.length,
+  });
+
+  emitAdminEvent(SOCKET_EVENTS.FOOD_UPDATED, {
+    foodId,
+    name: food.name,
+    slug: food.slug,
+    price: food.price,
+  });
+
+  return food.images;
 };
 
 export const deleteFood = async (foodId) => {

@@ -3,6 +3,7 @@ import {
   listFoods,
   getFoodById,
   updateFood,
+  deleteSpecificImage,
   deleteFood,
 } from './food.service.js';
 
@@ -73,6 +74,24 @@ export const updateFoodController = async (req, res, next) => {
       code: 'OK',
       message: 'Food updated',
       data: { food },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSpecificImageController = async (req, res, next) => {
+  try {
+    const { id: foodId, imageId } = req.params;
+
+    const remainingImages = await deleteSpecificImage(foodId, imageId);
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      code: 'OK',
+      message: 'Image deleted successfully',
+      data: { images: remainingImages },
     });
   } catch (error) {
     next(error);
