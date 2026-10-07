@@ -4,6 +4,7 @@ import { requirePermission } from '../../middlewares/authorize.middleware.js';
 import {
   validateBody,
   validateQuery,
+  validateParams,
 } from '../../middlewares/validate.middleware.js';
 import { validateObjectIdParam } from '../../middlewares/objectId.middleware.js';
 import { env } from '../../config/env.js';
@@ -13,6 +14,7 @@ import {
   createFoodSchema,
   updateFoodSchema,
   foodQuerySchema,
+  imageIdParamSchema,
 } from './food.validator.js';
 import {
   createFoodController,
@@ -20,6 +22,7 @@ import {
   getFoodController,
   updateFoodController,
   deleteFoodController,
+  deleteSpecificImageController,
 } from './food.controller.js';
 import { auditLog } from '../../middlewares/auditLog.middleware.js';
 import { uploadMultiple } from '../../middlewares/upload.middleware.js';
@@ -27,15 +30,22 @@ import { adminDestructiveRateLimiter } from '../../middlewares/rateLimiter.middl
 
 const router = Router();
 
-const adminAuth = createAuthMiddleware(env.ADMIN_JWT_SECRET, async (adminId) =>
-  Admin.findById(adminId),
+const adminAuth = createAuthMiddleware(
+  env.ADMIN_JWT_SECRET,
+  async (adminId) => {
+    return Admin.findById(adminId);
+  },
 );
 
-// Public
+// ============================================================
+// Public routes
+// ============================================================
 router.get('/', validateQuery(foodQuerySchema), listFoodsController);
 router.get('/:id', validateObjectIdParam('id'), getFoodController);
 
-// Admin
+// ============================================================
+// Admin routes — Create
+// ============================================================
 router.post(
   '/',
   adminAuth,
@@ -46,6 +56,9 @@ router.post(
   createFoodController,
 );
 
+// ============================================================
+// Admin routes — Update (appends images, doesn't replace)
+// ============================================================
 router.put(
   '/:id',
   adminAuth,
@@ -57,6 +70,24 @@ router.put(
   updateFoodController,
 );
 
+// ============================================================
+// Admin routes — Delete specific image (NEW)
+// Route order matters: must be BEFORE the generic /:id DELETE
+// ============================================================
+router.delete(
+  '/:id/images/:imageId',
+  adminDestructiveRateLimiter,
+  adminAuth,
+  requirePermission(PERMISSIONS.FOODS_UPDATE),
+  validateObjectIdParam('id'),
+  validateParams(imageIdParamSchema),
+  auditLog('food.image.delete'),
+  deleteSpecificImageController,
+);
+
+// ============================================================
+// Admin routes — Delete entire food
+// ============================================================
 router.delete(
   '/:id',
   adminDestructiveRateLimiter,
